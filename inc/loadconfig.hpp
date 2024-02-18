@@ -23,18 +23,18 @@ private:
 		DeviceItem(blkid_dev device);
 		const char* GetFSStr();
 		void		print(std::ostream& os);
-		bool		haveMounted(const std::vector<std::string>& mountedList);
 	};
 	class GetDevices {
 	public:
 		GetDevices();
 		GetDevices(const char* devicePath);
-		void GetMountedList();
+		bool GetMountedList();
 		DIR* GetConfigFile();
 		void debug();
 
 	private:
-		std::vector<DeviceItem>	 deviceList;
-		std::vector<std::string> mountedList;
+		std::vector<DeviceItem> deviceList;
+		std::string				mountedBlock;
+		std::string				USBDeviceName;
 	};
 };

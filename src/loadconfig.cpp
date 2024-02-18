@@ -6,6 +6,14 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <unistd.h>
+static bool BeginWith(const char* str, const char* header) {
+	while (*header != 0) {
+		if (*str != *header) return false;
+		str++;
+		header++;
+	}
+	return true;
+}
 LoadConfig::DeviceItem::DeviceItem(blkid_dev device) {
 	deviceName			   = std::string(blkid_dev_devname(device));
 	deviceLabel			   = "";
@@ -50,14 +58,12 @@ const char* LoadConfig::DeviceItem::GetFSStr() {
 void LoadConfig::DeviceItem::print(std::ostream& os) {
 	os << deviceName << ", label=" << deviceLabel << ", type=" << GetFSStr() << std::endl;
 }
-bool LoadConfig::DeviceItem::haveMounted(const std::vector<std::string>& mountedList) {
-	for (auto item : mountedList) {
-		if (deviceName == item) return true;
-	}
-	return false;
-}
 
 LoadConfig::GetDevices::GetDevices() {
+	// Get Mounted devices
+	mountedBlock  = "";
+	USBDeviceName = "";
+	if (GetMountedList() == false) return;
 	blkid_cache cache = nullptr;
 	if (blkid_get_cache(&cache, nullptr) < 0) return;
 	blkid_probe_all(cache);
@@ -67,7 +73,8 @@ LoadConfig::GetDevices::GetDevices() {
 	while (blkid_dev_next(iter, &dev) == 0) {
 		dev = blkid_verify(cache, dev);
 		if (!dev) continue;
-		deviceList.push_back(DeviceItem(dev));
+		if (BeginWith(blkid_dev_devname(dev), USBDeviceName.c_str()) == true)
+			deviceList.push_back(DeviceItem(dev));
 	}
 	blkid_dev_iterate_end(iter);
 	blkid_put_cache(cache);
@@ -81,24 +88,41 @@ LoadConfig::GetDevices::GetDevices(const char* devicePath) {
 	deviceList.push_back(DeviceItem(dev));
 	blkid_put_cache(cache);
 }
-void LoadConfig::GetDevices::GetMountedList() {
+// Get Mounted List and Get USB Device Name
+bool LoadConfig::GetDevices::GetMountedList() {
 	std::ifstream mounts("/proc/self/mounts", std::ios_base::in);
-	if (mounts.bad()) return;
+	if (mounts.bad()) return false;
 	while (true) {
 		char buf[160];
 		mounts.getline(buf, sizeof(buf));
-		if (mounts.eof()) return;
-		if (buf[0] == '/') {
+		if (mounts.eof()) break;
+		// usb should as /dev/sdxN
+		if (BeginWith(buf, "/dev/sd") == true) {
 			char* p = buf;
 			while (*p != ' ') p++;
 			*p = 0;
-			mountedList.push_back(std::string(buf));
+			// have collected mounted block
+			if (mountedBlock.size() != 0) {
+				if (strcmp(buf, mountedBlock.c_str()) != 0)
+					// this is not what have collected
+					// should not happen
+					return false;
+				else
+					// another collected device
+					continue;
+			}
+			mountedBlock = std::string(buf);
 		}
 	}
+	if (mountedBlock.size() == 0) return false;	 // should be only one
+	USBDeviceName = mountedBlock.substr(0, 8);
+	return true;
 }
+// BUG:ERROR WHEN HAPPEN IN BLOCKS HAVE MOUNTED
 DIR* LoadConfig::GetDevices::GetConfigFile() {
-	GetMountedList();
 	// create mount point
+	if (deviceList.size() == 0) return nullptr;
+	for (auto item : deviceList) { item.print(std::cout); }
 	DIR* dp;
 	if ((dp = opendir(mountPoint)) == nullptr)
 		mkdir(mountPoint, S_IRWXU);
@@ -109,7 +133,7 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 	}
 	// get device name
 	for (auto item : deviceList) {
-		if (item.deviceLabel == "Ventoy" && !item.haveMounted(mountedList) &&
+		if (item.deviceLabel == "Ventoy" &&
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount ventoy
 			int mounterr = mount(
@@ -128,7 +152,7 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 	}
 	for (auto item : deviceList) {
 		if (item.deviceFSType != DeviceItem::fstype::OTHER &&
-			!item.haveMounted(mountedList)) {
+			item.deviceName != mountedBlock) {
 			// mount fs
 			int mounterr = mount(
 				item.deviceName.c_str(), mountPoint, item.GetFSStr(), MS_RDONLY, nullptr);
