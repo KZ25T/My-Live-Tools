@@ -92,7 +92,6 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
    要求：此分区的文件系统格式为 vfat(fat32), exfat, ext4, xfs, btrfs, iso9660 中的一个（一般 U 盘是 exfat），不能是 ntfs 格式。
 2. 在该分区中创建一个目录 `.live`，其绝对路径为 `/some/mount/point/.live`
 3. 若需要使用第一个功能：
-
    - 找一个工作目录，如 workfolder
    - 创建根目录：`mkdir rootfs`
    - 比如说你希望启动后有 `/home/user/Desktop/picture.png` 和 `/usr/bin/yourcmd`，那么将其移动到 rootfs 下，使得
@@ -110,7 +109,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
      6 directories, 2 files
      ```
 
-   - 打包：`cd rootfs && zip /some/mount/point/.live/overlay.zip -r .`
+   - 打包：`cd rootfs && zip /some/mount/point/.live/overlay.zip -r .`，即产生 `overlay.zip` 放在 .live 下。
    - 暂不支持加密的 zip 包，或其他的高级设置。
    - 尽量不要在 Windows 上产生该压缩包。如果该压缩包用 Windows 产生，请保证双击打开后即为根目录（可见 home 或 usr 等），且不要使用中文路径或文件名。
    - 提示：如果你是 Ventoy 用户，那么 Ventoy 有类似的功能（但实现原理和我的不一样），参考[相关说明](https://www.ventoy.net/cn/doc_live_injection.html)。（我的功能未经过完备测试，Ventoy 的测试肯定比我强）
@@ -121,22 +120,21 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
      - 提供 ssh/gpg 密钥配置：`/home/user/.ssh/` 或 `/home/user/.gnupg/` 使得开机后就能直接 ssh 等。**安全提示：如安装此配置，请谨防相关文件泄漏。**
      - 提供 wifi 配置：`/etc/NetworkManager/system-connections/WIFI名字.nmconnection` 可以开机之后自动连接 wifi
 4. 若需使用第二个功能：
-
    - 创建目录：`mkdir /some/mount/point/.live/packages`
    - 将需要安装的 deb 包添加至以上目录内。
    - 本人调用 dpkg 安装，不能使用 apt 处理依赖，请记得下载完整依赖。
-   - 小技巧：`apt depends xxx` 查看依赖（请递归查询），`apt download xxx` 下载软件源里的 deb 包。
+   - 小技巧：`apt depends xxx` 查看依赖（请递归查询），`apt download xxx` 下载软件源里的 deb 包。请注意依赖关系及依赖版本，所以最好使用没有依赖的包。
 5. 若需使用第三个功能：
-
    - 将脚本复制为 `/some/mount/point/.live/startup-scripts`
 
 ### 5.3注意事项
 
 1. 本程序只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live` 目录的分区（且满足上文文件系统）为止。
-2. 在本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。
+2. 在本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。`.live` 下的所有文件必须为常规文件或目录，不能为链接等。
 3. 使用第一个功能时，不能在某个位置以文件覆盖目录，或者以目录覆盖文件。
 4. 三个功能依次进行，当且仅当能探测到所需文件时才运行。
 5. 此工具位置为：`/usr/bin/mlt`，为静态编译程序。
+6. 开机运行此工具时，`.live` 的位置是 `/tmp/mountpoint/.live`（编写脚本时，如有需要，可以参考）
 
 ### 5.4工具源码
 

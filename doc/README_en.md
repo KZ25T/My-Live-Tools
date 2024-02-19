@@ -120,17 +120,18 @@ This system supports the following functions:
    - Create directory: `mkdir /home/mount/point/.live/packages`
    - Add the deb package that needs to be installed to the above directory.
    - I am calling dpkg installation and cannot use APT to handle dependencies. Please remember to download the complete dependencies.
-   - Tips: `apt dependencies xxx` View dependencies (please recursively query), `apt download xxx` Download the deb package from the software source.
+   - Tips: `apt dependencies xxx` View dependencies (please recursively query), `apt download xxx` Download the deb package from the software source. Please pay attention to dependency relationships and dependent versions, so it is suggested to use packages without dependencies.
 5. If you need to use the third function:
    - Copy script as `/home/mount/point/. live/startup scripts`
 
 ### 5.3 Precautions
 
 1. This program only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live` directory is found (and meets the file system requirements mentioned above).
-2. When running this program, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links.
+2. When running this program, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live` must be regular file or direction, can not be links.
 3. When using the first function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
 4. The three functions are performed sequentially and only run when the required file can be detected.
 5. The location of this tool is `/usr/bin/mlt`, which is a static compiled program.
+6. While starting up and running this program, the loaction of `.live` is `/tmp/mountpoint/.live`(you can refer while writing scripts if needed.)
 
 ### 5.4 Tool source code
 

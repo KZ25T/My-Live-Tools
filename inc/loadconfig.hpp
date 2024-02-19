@@ -2,6 +2,7 @@
 #include <blkid/blkid.h>
 #include <dirent.h>
 #include <string>
+#include <sys/mount.h>
 #include <vector>
 const char* const mountPoint  = "/tmp/mountpoint";
 const char* const configPoint = "/tmp/mountpoint/.live";
@@ -11,6 +12,7 @@ public:
 	LoadConfig();
 	~LoadConfig();
 	bool success();
+	DIR* getDir();
 
 private:
 	DIR* cfgDir;
@@ -31,8 +33,6 @@ private:
 		GetDevices(const char* devicePath);
 		bool GetMountedList();
 		DIR* GetConfigFile();
-		void debug();
-
 	private:
 		std::vector<DeviceItem> deviceList;
 		std::string				USBDeviceName;

@@ -3,7 +3,6 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
-#include <sys/mount.h>
 #include <sys/stat.h>
 #include <unistd.h>
 /**
@@ -143,7 +142,7 @@ LoadConfig::GetDevices::GetDevices(const char* devicePath) {
  */
 bool LoadConfig::GetDevices::GetMountedList() {
 	std::ifstream mounts("/proc/self/mounts", std::ios_base::in);
-	std::string mountedBlock;
+	std::string	  mountedBlock;
 	if (mounts.bad()) return false;
 	while (true) {
 		char buf[160];
@@ -171,7 +170,6 @@ bool LoadConfig::GetDevices::GetMountedList() {
 	USBDeviceName = mountedBlock.substr(0, 8);
 	return true;
 }
-// BUG:ERROR WHEN HAPPEN IN BLOCKS HAVE MOUNTED
 /**
  * @brief get config file DIR ptr
  *
@@ -180,12 +178,11 @@ bool LoadConfig::GetDevices::GetMountedList() {
 DIR* LoadConfig::GetDevices::GetConfigFile() {
 	// create mount point
 	if (deviceList.size() == 0) return nullptr;
-	for (auto item : deviceList) { item.print(std::cout); }
 	DIR* dp;
 	if ((dp = opendir(mountPoint)) == nullptr)
 		mkdir(mountPoint, S_IRWXU);
 	else {
-		std::cerr << "error: folder exists" << std::endl;
+		std::cout << "error: folder exists" << std::endl;
 		closedir(dp);
 		return nullptr;
 	}
@@ -231,10 +228,6 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 	return nullptr;
 }
 
-void LoadConfig::GetDevices::debug() {
-	for (auto item : deviceList) { item.print(std::cout); }
-}
-
 LoadConfig::LoadConfig() {
 	cfgDir = GetDevices().GetConfigFile();
 }
@@ -244,4 +237,7 @@ LoadConfig::~LoadConfig() {
 bool LoadConfig::success() {
 	if (cfgDir != nullptr) return true;
 	return false;
+}
+DIR* LoadConfig::getDir() {
+	return cfgDir;
 }

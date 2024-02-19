@@ -7,7 +7,7 @@ OBJ = $(patsubst %.cpp, $(SRC_DIR)/%.o, $(notdir $(SRC)))
 TARGET = mlt
 
 CXX = g++
-CXXFLAGS = --static -lblkid
+CXXFLAGS = --static -lblkid -std=c++20 -Wall -Wextra
 
 $(TARGET):$(OBJ)
 	$(CXX) $(OBJ) $(CXXFLAGS) -o $@
