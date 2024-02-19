@@ -16,5 +16,5 @@ $(SRC_DIR)/%.o:$(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c $< -o $@
 
 clean:
-	find $(SRC_DIR) -name *.o -exec rm -rf {} \;
+	find $(SRC_DIR) -name *.o -exec rm {} \;
 	rm $(TARGET)

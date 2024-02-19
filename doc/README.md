@@ -82,13 +82,13 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 本系统支持以下功能：
 
 - 在已有系统上添加文件。
-  功能：如使得启动后有一个文件 `/home/user/Desktop/picture.png` 和 `/usr/bin/yourcmd`，或者添加 `/etc/NetworkManager/system-connections/YOUR_WIFI_NAME.nmconnection` 以使得开机后能自动连接你家的 wifi 网络。
+  作用：如使得启动后有一个文件 `/home/user/Desktop/picture.png` 和 `/usr/bin/yourcmd`
 - 在启动时安装 deb 包。
 - 在启动时运行脚本。
 
 ### 5.2简要使用方法
 
-1. 在装有本系统镜像的 U 盘上，任选一个分区装载本工具的资源文件。如果您是用 Ventoy 装载的镜像，那么建议放在 Ventoy 分区内。
+1. 在装有本系统镜像的 U 盘上，任选一个分区装载本工具的资源文件。如果您是用 Ventoy 装载的镜像，那么建议放在 Ventoy 分区内（也就是 iso 文件所在的位置），不要放在 VOTEFI 分区内。
    要求：此分区的文件系统格式为 vfat(fat32), exfat, ext4, xfs, btrfs, iso9660 中的一个（一般 U 盘是 exfat），不能是 ntfs 格式。
 2. 在该分区中创建一个目录 `.live`，其绝对路径为 `/some/mount/point/.live`
 3. 若需要使用第一个功能：
@@ -113,6 +113,13 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
    - 打包：`cd rootfs && zip /some/mount/point/.live/overlay.zip -r .`
    - 暂不支持加密的 zip 包，或其他的高级设置。
    - 尽量不要在 Windows 上产生该压缩包。如果该压缩包用 Windows 产生，请保证双击打开后即为根目录（可见 home 或 usr 等），且不要使用中文路径或文件名。
+   - 提示：如果你是 Ventoy 用户，那么 Ventoy 有类似的功能（但实现原理和我的不一样），参考[相关说明](https://www.ventoy.net/cn/doc_live_injection.html)。（我的功能未经过完备测试，Ventoy 的测试肯定比我强）
+   - 提示：本功能的可能用处：
+     - 添加常用文件到桌面：`/home/user/Desktop/common-files`
+     - 覆盖默认的 zsh 配置：`/home/user/.zshrc`
+     - 提供 git 配置，使得开机后的 git 就按照已有的配置：`/home/user/.gitconfig` 和 `.git-credentials`
+     - 提供 ssh/gpg 密钥配置：`/home/user/.ssh/` 或 `/home/user/.gnupg/` 使得开机后就能直接 ssh 等。**安全提示：如安装此配置，请谨防相关文件泄漏。**
+     - 提供 wifi 配置：`/etc/NetworkManager/system-connections/WIFI名字.nmconnection` 可以开机之后自动连接 wifi
 4. 若需使用第二个功能：
 
    - 创建目录：`mkdir /some/mount/point/.live/packages`
@@ -125,7 +132,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 
 ### 5.3注意事项
 
-1. 本程序只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照字典顺序查找 U 盘各个分区，直到查找到含有 `.live` 目录的分区（且满足上文文件系统）为止。也就是说，如果 U 盘（`/dev/sda`）有不小于 10 个分区，那么 `/dev/sda10` 会早于 `/dev/sda1` 被找到。
+1. 本程序只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live` 目录的分区（且满足上文文件系统）为止。
 2. 在本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。
 3. 使用第一个功能时，不能在某个位置以文件覆盖目录，或者以目录覆盖文件。
 4. 三个功能依次进行，当且仅当能探测到所需文件时才运行。

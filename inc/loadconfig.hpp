@@ -23,6 +23,7 @@ private:
 		DeviceItem(blkid_dev device);
 		const char* GetFSStr();
 		void		print(std::ostream& os);
+		bool		operator<(const DeviceItem& another);
 	};
 	class GetDevices {
 	public:
@@ -34,7 +35,6 @@ private:
 
 	private:
 		std::vector<DeviceItem> deviceList;
-		std::string				mountedBlock;
 		std::string				USBDeviceName;
 	};
 };

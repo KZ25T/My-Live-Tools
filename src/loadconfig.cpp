@@ -6,6 +6,14 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <unistd.h>
+/**
+ * @brief verify is str is begin with header
+ *
+ * @param str waiting for verify
+ * @param header the header
+ * @return true OK
+ * @return false Not OK
+ */
 static bool BeginWith(const char* str, const char* header) {
 	while (*header != 0) {
 		if (*str != *header) return false;
@@ -14,6 +22,11 @@ static bool BeginWith(const char* str, const char* header) {
 	}
 	return true;
 }
+/**
+ * @brief create a new device item
+ *
+ * @param device device ptr
+ */
 LoadConfig::DeviceItem::DeviceItem(blkid_dev device) {
 	deviceName			   = std::string(blkid_dev_devname(device));
 	deviceLabel			   = "";
@@ -44,6 +57,11 @@ LoadConfig::DeviceItem::DeviceItem(blkid_dev device) {
 	}
 	blkid_tag_iterate_end(iter);
 }
+/**
+ * @brief Convert deviceFSType to str
+ *
+ * @return const char* fstype string
+ */
 const char* LoadConfig::DeviceItem::GetFSStr() {
 	switch (deviceFSType) {
 		case VFAT: return "vfat";
@@ -55,14 +73,36 @@ const char* LoadConfig::DeviceItem::GetFSStr() {
 		default: return "other";
 	}
 }
+/**
+ * @brief load for debug
+ *
+ * @param os
+ */
 void LoadConfig::DeviceItem::print(std::ostream& os) {
 	os << deviceName << ", label=" << deviceLabel << ", type=" << GetFSStr() << std::endl;
 }
-
+/**
+ * @brief for std::sort
+ *
+ * @param another
+ * @return true
+ * @return false
+ */
+bool LoadConfig::DeviceItem::operator<(const DeviceItem& another) {
+	int lval = atoi(deviceName.c_str() + 8);  // 8: /dev/sdx
+	int rval = atoi(another.deviceName.c_str() + 8);
+	if (lval < rval)
+		return true;
+	else
+		return false;
+}
+/**
+ * @brief Get Devices, while get mounted devices and usb device name, then search all
+ * block devices under the same usb name.
+ */
 LoadConfig::GetDevices::GetDevices() {
-	// Get Mounted devices
-	mountedBlock  = "";
 	USBDeviceName = "";
+	// Get Mounted devices
 	if (GetMountedList() == false) return;
 	blkid_cache cache = nullptr;
 	if (blkid_get_cache(&cache, nullptr) < 0) return;
@@ -73,13 +113,20 @@ LoadConfig::GetDevices::GetDevices() {
 	while (blkid_dev_next(iter, &dev) == 0) {
 		dev = blkid_verify(cache, dev);
 		if (!dev) continue;
+		// should be the same usb device
 		if (BeginWith(blkid_dev_devname(dev), USBDeviceName.c_str()) == true)
-			deviceList.push_back(DeviceItem(dev));
+			deviceList.push_back({dev});
 	}
+	std::sort(deviceList.begin(), deviceList.end());
 	blkid_dev_iterate_end(iter);
 	blkid_put_cache(cache);
 	return;
 }
+/**
+ * @brief NOT COMPLETED YET
+ *
+ * @param devicePath
+ */
 LoadConfig::GetDevices::GetDevices(const char* devicePath) {
 	blkid_cache cache = nullptr;
 	if (blkid_get_cache(&cache, nullptr) < 0) return;
@@ -88,9 +135,15 @@ LoadConfig::GetDevices::GetDevices(const char* devicePath) {
 	deviceList.push_back(DeviceItem(dev));
 	blkid_put_cache(cache);
 }
-// Get Mounted List and Get USB Device Name
+/**
+ * @brief get mounted devices and usb device name
+ *
+ * @return true get success
+ * @return false not success
+ */
 bool LoadConfig::GetDevices::GetMountedList() {
 	std::ifstream mounts("/proc/self/mounts", std::ios_base::in);
+	std::string mountedBlock;
 	if (mounts.bad()) return false;
 	while (true) {
 		char buf[160];
@@ -119,6 +172,11 @@ bool LoadConfig::GetDevices::GetMountedList() {
 	return true;
 }
 // BUG:ERROR WHEN HAPPEN IN BLOCKS HAVE MOUNTED
+/**
+ * @brief get config file DIR ptr
+ *
+ * @return DIR* config file DIR, should be /tmp/mountpoint/.live
+ */
 DIR* LoadConfig::GetDevices::GetConfigFile() {
 	// create mount point
 	if (deviceList.size() == 0) return nullptr;
@@ -131,7 +189,7 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 		closedir(dp);
 		return nullptr;
 	}
-	// get device name
+	// get device name, first search Ventoy(should be only one Ventoy in one USB)
 	for (auto item : deviceList) {
 		if (item.deviceLabel == "Ventoy" &&
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
@@ -150,9 +208,10 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 			}
 		}
 	}
+	// get other device name
 	for (auto item : deviceList) {
-		if (item.deviceFSType != DeviceItem::fstype::OTHER &&
-			item.deviceName != mountedBlock) {
+		if (item.deviceLabel != "Ventoy" && item.deviceLabel != "VOTEFI" &&
+			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount fs
 			int mounterr = mount(
 				item.deviceName.c_str(), mountPoint, item.GetFSStr(), MS_RDONLY, nullptr);

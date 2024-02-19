@@ -79,13 +79,13 @@ This system is a free tool designed for enthusiasts and is not intended for any 
 This system supports the following functions:
 
 - Add files on existing systems.
-  Function: For example, to create a file called `/home/user/Desktop/picture. png` and `/usr/bin/yourcmd` after startup, or to add `/etc/NetworkManager/system connections/YOUR_WIFI-NAME.nmconnection` to automatically connect to your WiFi network after startup.
+  Function: For example, to create a file called `/home/user/Desktop/picture. png` and `/usr/bin/yourcmd` after startup.
 - Install the deb package at startup.
 - Run the script at startup.
 
 ### 5.2 Brief usage method
 
-1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, it is recommended to place it in the Ventoy partition.
+1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, it is recommended to place it in the Ventoy partition, and you shouled not place it in VOTEFI partition.
    Requirement: The file system format for this partition is one of vfat (fat32), exfat, ext4, xfs, btrfs, or iso9660 (usually exfat for USB drives), and cannot be in ntfs format.
 2. Create a directory in this partition called `.live` with an absolute path of `/home/mount/point/.live`
 3. If you need to use the first function:
@@ -109,6 +109,13 @@ This system supports the following functions:
    - Packaging: `cd rootfs && zip /home/mount/point/.live/overlay.zip -r .`
    - Encrypted zip packages or other advanced settings are not currently supported.
    - Try not to generate this compressed file on Windows. If the compressed file is generated using Windows, please ensure that when opened by double clicking, it becomes the root directory (visible as home or usr, etc.), and do not use Chinese paths or file names.
+   - Tip: If you are a Ventoy user, then Ventoy has similar functions (but the implementation principle is different from mine), please refer to [relevant instructions](https://www.ventoy.net/en/doc_live_injection.html). (My functionality has not been fully tested, Ventoy's testing is definitely stronger than mine)
+   - Tip: Possible uses of this feature:
+     - Add frequently used files to desktop: `/home/user/Desktop/common files`
+     - Overwrite default zsh configuration: `/home/user/. zshrc`
+     - Provide git configuration so that after booting up, the git will follow your configuration: `/home/user/.gitconfig` and `.git-credentials`
+     - Provide SSH/GPG key configuration: `/home/user/.ssh/` or `/home/user/.gnupg/` to enable direct SSH after startup. **Safety reminder: If installing this configuration, please be careful to prevent related file leaks.**
+     - Provide WiFi configuration: `/etc/NetworkManager/system connections/WIFI_NAME.nmconnection` can automatically connect to WiFi after startup.
 4. If you need to use the second function:
    - Create directory: `mkdir /home/mount/point/.live/packages`
    - Add the deb package that needs to be installed to the above directory.
@@ -119,7 +126,7 @@ This system supports the following functions:
 
 ### 5.3 Precautions
 
-1. This program only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for each partition of the USB drive in dictionary order until a partition containing the `.live` directory is found (and meets the file system requirements mentioned above). That is to say, if a USB drive (`/dev/sda`) has no less than 10 partitions, then `/dev/sda10` will be found earlier than `/dev/sda1`.
+1. This program only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live` directory is found (and meets the file system requirements mentioned above).
 2. When running this program, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links.
 3. When using the first function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
 4. The three functions are performed sequentially and only run when the required file can be detected.
