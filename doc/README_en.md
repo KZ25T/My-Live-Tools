@@ -74,7 +74,7 @@ This system is a free tool designed for enthusiasts and is not intended for any 
 
 ## 5.Livecd tool
 
-### 5.1Functions
+### 5.1 Startup Functions
 
 This system supports the following functions:
 
@@ -83,7 +83,7 @@ This system supports the following functions:
 - Install the deb package at startup.
 - Run the script at startup.
 
-### 5.2 Brief usage method
+### 5.2 Startup Brief usage method
 
 1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, it is recommended to place it in the Ventoy partition, and you shouled not place it in VOTEFI partition.
    Requirement: The file system format for this partition is one of vfat (fat32), exfat, ext4, xfs, btrfs, or iso9660 (usually exfat for USB drives), and cannot be in ntfs format.
@@ -120,20 +120,45 @@ This system supports the following functions:
    - Create directory: `mkdir /home/mount/point/.live/packages`
    - Add the deb package that needs to be installed to the above directory.
    - I am calling dpkg installation and cannot use APT to handle dependencies. Please remember to download the complete dependencies.
-   - Tips: `apt dependencies xxx` View dependencies (please recursively query), `apt download xxx` Download the deb package from the software source. Please pay attention to dependency relationships and dependent versions, so it is suggested to use packages without dependencies.
+   - Tips: `apt dependencies xxx` View dependencies (please recursively query), `apt download xxx` Download the deb package from the software source. Please pay attention to dependency relationships and dependent versions, so it is suggested to use packages without dependencies, such as WPS office(a popular doc/xls/ppt editor in China).
 5. If you need to use the third function:
    - Copy script as `/home/mount/point/. live/startup scripts`
 
-### 5.3 Precautions
+### 5.3 Other functions
 
-1. This program only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live` directory is found (and meets the file system requirements mentioned above).
-2. When running this program, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live` must be regular file or direction, can not be links.
-3. When using the first function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
-4. The three functions are performed sequentially and only run when the required file can be detected.
+1. `mlt --config-path(or -c) PATH` siecify configure file path, when`.live/OSname` does not exist, you can use this option to complete. The three files/folder should under PATH.
+2. `mlt --mount-dev(or -m) PATH` mounts dev, proc, sys to chroot path. The same as:
+
+   ```bash
+   mount -t proc  /proc ${PATH}/proc/
+   mount -t sysfs /sys  ${PATH}/sys/
+   mount --rbind  /dev  ${PATH}/dev/
+   mount --rbind  /run  ${PATH}/run/
+   mount -t tmpfs  shm  ${PATH}/dev/shm/
+   ```
+
+3. `mlt --umount-dev(或 -u) PATH` unmount what mounted above. The same as:
+
+   ```bash
+   umount ${PATH}/dev/shm
+   umount --make-rslave ${PATH}/run/
+   umount -R ${PATH}/run/
+   umount --make-rslave ${PATH}/dev/
+   umount -R ${PATH}/dev/
+   umount ${PATH}/sys/
+   umount ${PATH}/proc
+   ```
+
+### 5.4 Precautions
+
+1. This program starting-up functions only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live` directory is found (and meets the file system requirements mentioned above).
+2. When running this program on starting up, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live` must be regular file or direction, can not be links.
+3. When using the first starting-up function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
+4. The three starting-up functions are performed sequentially and only run when the required file can be detected.
 5. The location of this tool is `/usr/bin/mlt`, which is a static compiled program.
 6. While starting up and running this program, the loaction of `.live` is `/tmp/mountpoint/.live`(you can refer while writing scripts if needed.)
 
-### 5.4 Tool source code
+### 5.5 Tool source code
 
 [GitHub](https://github.com/KZ25T/My-Live-Tools) or [Gitee](https://gitee.com/KZ25T/my-live-tools)
 
@@ -150,14 +175,13 @@ Steps:
 - Tip: If your computer only has Windows (Windows 10 or 11) installed, there should be an ESP partition on your hard drive (opened with gparted, labeled as boot, esp, etc., formatted as fat32) that needs to be mounted to `/mnt/debian/boot/efi`.
 -Copy content outside the entire system startup section: `sudo cp -rp /run/live/rootfs/filesystem.squashfs/* /mnt/debian`
 - Installing the kernel
-  - First complete chroot: `sudo chroot /mnt/debian /bin/bash`
-  - Then reinstall using APT: `(chroot) sudo apt reinstall linux-image-amd64`
+  - copy kernel and initramfs file:`sudo cp /run/live/medium/boot/binary/live/vmlinuz /run/live/medium/boot/binary/live/initrd.img /mnt/debian/boot`
 - Install grub and configure boot
   - If your computer already has a grub (which is common when your computer already has a Linux operating system and will enter the grub page upon startup), then you don't need to install grub, just press back to the original Linux system, execute `sudo update grub` (some distributions are `grub-mkconfig -o /boot/grub/grub.cfg`), and remember to enable os-prober
   - If your computer does not have Grub (which is common on your computer and may only have one Windows 10/11), you need to install Grub:
+    - Chroot: `sudo mlt /mnt/chroot`, then `sudo chroot /mnt/debian /bin/bash`
     - Install EFI directory: `(chroot) sudo mkdir -p /boot/efi/EFI/debian`
     - Install system probe: `(chroot) sudo apt install os-prober`, then mask option: `(chroot) sudo vim /etc/default/grub` Set `GRUB_DISABLE_OS_PROBER` to false or comment it out (otherwise other operating systems cannot be detected)
-    - Exit chroot: Press `Ctrl+D` or `exit`
     - Install grub file: `(chroot) sudo cp /usr/lib/grub/x86_64-efi/monolithic/grubx64.efi /boot/efi/EFI/debian`
     - Update grub: `(chroot) sudo grub-install YOUR_HARD_DRIVE`, then `sudo update grub`
 - Set up mounting system:

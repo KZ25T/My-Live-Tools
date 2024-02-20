@@ -6,35 +6,19 @@
 #include <sys/stat.h>
 #include <unistd.h>
 /**
- * @brief verify is str is begin with header
- *
- * @param str waiting for verify
- * @param header the header
- * @return true OK
- * @return false Not OK
- */
-static bool BeginWith(const char* str, const char* header) {
-	while (*header != 0) {
-		if (*str != *header) return false;
-		str++;
-		header++;
-	}
-	return true;
-}
-/**
  * @brief create a new device item
  *
  * @param device device ptr
  */
 LoadConfig::DeviceItem::DeviceItem(blkid_dev device) {
-	deviceName			   = std::string(blkid_dev_devname(device));
+	deviceName			   = string(blkid_dev_devname(device));
 	deviceLabel			   = "";
 	deviceFSType		   = OTHER;
 	blkid_tag_iterate iter = blkid_tag_iterate_begin(device);
 	const char *	  type, *value;
 	while (blkid_tag_next(iter, &type, &value) == 0) {
 		if (strcmp(type, "LABEL") == 0) {
-			deviceLabel = std::string(value);
+			deviceLabel = string(value);
 			continue;
 		}
 		if (strcmp(type, "TYPE") == 0) {
@@ -113,26 +97,13 @@ LoadConfig::GetDevices::GetDevices() {
 		dev = blkid_verify(cache, dev);
 		if (!dev) continue;
 		// should be the same usb device
-		if (BeginWith(blkid_dev_devname(dev), USBDeviceName.c_str()) == true)
+		if (beginWith(blkid_dev_devname(dev), USBDeviceName.c_str()) == true)
 			deviceList.push_back({dev});
 	}
 	std::sort(deviceList.begin(), deviceList.end());
 	blkid_dev_iterate_end(iter);
 	blkid_put_cache(cache);
 	return;
-}
-/**
- * @brief NOT COMPLETED YET
- *
- * @param devicePath
- */
-LoadConfig::GetDevices::GetDevices(const char* devicePath) {
-	blkid_cache cache = nullptr;
-	if (blkid_get_cache(&cache, nullptr) < 0) return;
-	blkid_dev dev = blkid_get_dev(cache, devicePath, BLKID_DEV_NORMAL);
-	if (!dev) return;
-	deviceList.push_back(DeviceItem(dev));
-	blkid_put_cache(cache);
 }
 /**
  * @brief get mounted devices and usb device name
@@ -142,14 +113,14 @@ LoadConfig::GetDevices::GetDevices(const char* devicePath) {
  */
 bool LoadConfig::GetDevices::GetMountedList() {
 	std::ifstream mounts("/proc/self/mounts", std::ios_base::in);
-	std::string	  mountedBlock;
+	string	  mountedBlock;
 	if (mounts.bad()) return false;
 	while (true) {
 		char buf[160];
 		mounts.getline(buf, sizeof(buf));
 		if (mounts.eof()) break;
 		// usb should as /dev/sdxN
-		if (BeginWith(buf, "/dev/sd") == true) {
+		if (beginWith(buf, "/dev/sd") == true) {
 			char* p = buf;
 			while (*p != ' ') p++;
 			*p = 0;
@@ -163,7 +134,7 @@ bool LoadConfig::GetDevices::GetMountedList() {
 					// another collected device
 					continue;
 			}
-			mountedBlock = std::string(buf);
+			mountedBlock = string(buf);
 		}
 	}
 	if (mountedBlock.size() == 0) return false;	 // should be only one
@@ -179,12 +150,17 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 	// create mount point
 	if (deviceList.size() == 0) return nullptr;
 	DIR* dp;
-	if ((dp = opendir(mountPoint)) == nullptr)
-		mkdir(mountPoint, S_IRWXU);
+	if ((dp = opendir(mntPoint)) == nullptr)
+		// mountpoint does not exist
+		mkdir(mntPoint, S_IRWXU);
 	else {
-		std::cout << "error: folder exists" << std::endl;
-		closedir(dp);
-		return nullptr;
+		if (readdir(dp) != nullptr) {
+			// mountpoint is not empty
+			std::cout << "error: folder exists" << std::endl;
+			closedir(dp);
+			return nullptr;
+		}
+		// mountpoint is empty
 	}
 	// get device name, first search Ventoy(should be only one Ventoy in one USB)
 	for (auto item : deviceList) {
@@ -192,15 +168,15 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount ventoy
 			int mounterr = mount(
-				item.deviceName.c_str(), mountPoint, item.GetFSStr(), MS_RDONLY, nullptr);
+				item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY, nullptr);
 			if (mounterr != 0) break;
-			if ((dp = opendir(configPoint)) != nullptr) {
+			if ((dp = opendir(cfgPoint)) != nullptr) {
 				// exist!
 				return dp;
 			}
 			else {
 				// do not exist, umount, try other all fs.
-				umount(mountPoint);
+				umount(mntPoint);
 				break;
 			}
 		}
@@ -211,20 +187,20 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount fs
 			int mounterr = mount(
-				item.deviceName.c_str(), mountPoint, item.GetFSStr(), MS_RDONLY, nullptr);
+				item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY, nullptr);
 			if (mounterr != 0) continue;
-			if ((dp = opendir(configPoint)) != nullptr) {
+			if ((dp = opendir(cfgPoint)) != nullptr) {
 				// exist!
 				return dp;
 			}
 			else {
 				// do not exist, umount, try other all fs.
-				umount(mountPoint);
+				umount(mntPoint);
 				continue;
 			}
 		}
 	}
-	rmdir(mountPoint);
+	rmdir(mntPoint);
 	return nullptr;
 }
 
@@ -232,7 +208,7 @@ LoadConfig::LoadConfig() {
 	cfgDir = GetDevices().GetConfigFile();
 }
 LoadConfig::~LoadConfig() {
-	if (cfgDir != nullptr) { rmdir(mountPoint); }
+	if (cfgDir != nullptr) { rmdir(mntPoint); }
 }
 bool LoadConfig::success() {
 	if (cfgDir != nullptr) return true;

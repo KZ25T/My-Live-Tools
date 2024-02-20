@@ -77,7 +77,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 
 ## 5.Livecd工具
 
-### 5.1功能
+### 5.1启动时功能
 
 本系统支持以下功能：
 
@@ -86,7 +86,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 - 在启动时安装 deb 包。
 - 在启动时运行脚本。
 
-### 5.2简要使用方法
+### 5.2启动时功能的简要使用方法
 
 1. 在装有本系统镜像的 U 盘上，任选一个分区装载本工具的资源文件。如果您是用 Ventoy 装载的镜像，那么建议放在 Ventoy 分区内（也就是 iso 文件所在的位置），不要放在 VOTEFI 分区内。
    要求：此分区的文件系统格式为 vfat(fat32), exfat, ext4, xfs, btrfs, iso9660 中的一个（一般 U 盘是 exfat），不能是 ntfs 格式。
@@ -123,20 +123,45 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
    - 创建目录：`mkdir /some/mount/point/.live/packages`
    - 将需要安装的 deb 包添加至以上目录内。
    - 本人调用 dpkg 安装，不能使用 apt 处理依赖，请记得下载完整依赖。
-   - 小技巧：`apt depends xxx` 查看依赖（请递归查询），`apt download xxx` 下载软件源里的 deb 包。请注意依赖关系及依赖版本，所以最好使用没有依赖的包。
+   - 小技巧：`apt depends xxx` 查看依赖（请递归查询），`apt download xxx` 下载软件源里的 deb 包。请注意依赖关系及依赖版本，所以最好使用没有依赖的包，比如 wps。
 5. 若需使用第三个功能：
    - 将脚本复制为 `/some/mount/point/.live/startup-scripts`
 
-### 5.3注意事项
+### 5.3其他功能
 
-1. 本程序只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live` 目录的分区（且满足上文文件系统）为止。
-2. 在本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。`.live` 下的所有文件必须为常规文件或目录，不能为链接等。
-3. 使用第一个功能时，不能在某个位置以文件覆盖目录，或者以目录覆盖文件。
-4. 三个功能依次进行，当且仅当能探测到所需文件时才运行。
+1. `mlt --config-path(或 -c) PATH` 指定配置文件路径，用于当开机时功能所需要的文件不在 `.live/操作系统名` 下时完成此功能。PATH 下应当有开机时的三个功能需要的文件。
+2. `mlt --mount-dev(或 -m) PATH` 挂载 dev, proc, sys 到 chroot 目录。相当于：
+
+   ```bash
+   mount -t proc  /proc ${PATH}/proc/
+   mount -t sysfs /sys  ${PATH}/sys/
+   mount --rbind  /dev  ${PATH}/dev/
+   mount --rbind  /run  ${PATH}/run/
+   mount -t tmpfs  shm  ${PATH}/dev/shm/
+   ```
+
+3. `mlt --umount-dev(或 -u) PATH` 卸载上一条挂载的目录。相当于：
+
+   ```bash
+   umount ${PATH}/dev/shm
+   umount --make-rslave ${PATH}/run/
+   umount -R ${PATH}/run/
+   umount --make-rslave ${PATH}/dev/
+   umount -R ${PATH}/dev/
+   umount ${PATH}/sys/
+   umount ${PATH}/proc
+   ```
+
+### 5.4注意事项
+
+1. 本程序的启动时功能只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live` 目录的分区（且满足上文文件系统）为止。
+2. 在启动时本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。`.live` 下的所有文件必须为常规文件或目录，不能为链接等。
+3. 使用启动时第一个功能时，不能在某个位置以文件覆盖目录，或者以目录覆盖文件。
+4. 启动时的三个功能依次进行，当且仅当能探测到所需文件时才运行。
 5. 此工具位置为：`/usr/bin/mlt`，为静态编译程序。
 6. 开机运行此工具时，`.live` 的位置是 `/tmp/mountpoint/.live`（编写脚本时，如有需要，可以参考）
 
-### 5.4工具源码
+### 5.5工具源码
 
 [GitHub](https://github.com/KZ25T/My-Live-Tools)，[Gitee](https://gitee.com/KZ25T/my-live-tools)
 
@@ -153,14 +178,13 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
   - 提示：如果你的电脑只安装有 windows（windows 10 或 11），那么硬盘上应该会有一个 ESP 分区（用 gparted 打开，上边显示标识为 boot, esp 等，格式是 fat32），需要挂载到 `/mnt/debian/boot/efi` 上。
 - 复制整个系统启动部分以外的内容：`sudo cp -rp /run/live/rootfs/filesystem.squashfs/* /mnt/debian`
 - 安装内核
-  - 首先完成 chroot：`sudo chroot /mnt/debian /bin/bash`
-  - 然后用 apt 重装：`(chroot) sudo apt reinstall linux-image-amd64`
+  - 复制内核及 initramfs 文件：`sudo cp /run/live/medium/boot/binary/live/vmlinuz /run/live/medium/boot/binary/live/initrd.img /mnt/debian/boot`
 - 安装 grub 并配置引导
   - 如果您的电脑已经有 grub 了（这种常见于你的电脑已经有一个 linux 操作系统，启动时会进入 grub 页面），那么您不需要安装 grub，只需要按回到原有的 linux 系统，执行 `sudo update-grub`（有些发行版为 `grub-mkconfig -o /boot/grub/grub.cfg`）即可（记得启用 os-prober）
   - 如果您的电脑没有 grub （这种常见于你的电脑可能只有一个 windows 10/11），此时需要安装 grub：
+    - 完成 chroot：`sudo mlt /mnt/chroot`，之后 `sudo chroot /mnt/debian /bin/bash`
     - 安装 EFI 目录：`(chroot) sudo mkdir -p /boot/efi/EFI/debian`
     - 安装系统探测：`(chroot) sudo apt install os-prober`，然后屏蔽选项：`(chroot) sudo vim /etc/default/grub` 将 `GRUB_DISABLE_OS_PROBER` 设置为 false 或注释掉（否则不能检测到其他系统）
-    - 退出 chroot：按 `Ctrl+D` 或 `exit`
     - 安装 grub 文件：`(chroot) sudo cp /usr/lib/grub/x86_64-efi/monolithic/grubx64.efi /boot/efi/EFI/debian`
     - 更新 grub：`(chroot) sudo grub-install 你的硬盘`，之后 `sudo update-grub`
 - 设置挂载系统：
