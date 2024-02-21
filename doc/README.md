@@ -89,7 +89,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 ### 5.2启动时功能的简要使用方法
 
 1. 在装有本系统镜像的 U 盘上，任选一个分区装载本工具的资源文件。如果您是用 Ventoy 装载的镜像，那么建议放在 Ventoy 分区内（也就是 iso 文件所在的位置），不要放在 VOTEFI 分区内。
-   要求：此分区的文件系统格式为 vfat(fat32), exfat, ext4, xfs, btrfs, iso9660 中的一个（一般 U 盘是 exfat），不能是 ntfs 格式。
+   要求：此分区的文件系统格式为 vfat(fat32), exfat, ext4, xfs, btrfs, iso9660, ntfs 中的一个（一般 U 盘是 exfat），其中 ntfs 调用 ntfs-3g 命令，其他的进行系统调用。
 2. 在该分区中创建一个目录 `.live`，其绝对路径为 `/some/mount/point/.live`
 3. 若需要使用第一个功能：
    - 找一个工作目录，如 workfolder
@@ -129,7 +129,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 
 ### 5.3其他功能
 
-1. `mlt --config-path(或 -c) PATH` 指定配置文件路径，用于当开机时功能所需要的文件不在 `.live/操作系统名` 下时完成此功能。PATH 下应当有开机时的三个功能需要的文件。
+1. `mlt --config-path(或 -c) PATH` 指定配置文件路径，用于当开机时功能所需要的文件不在 `.live/操作系统名` 下时完成此功能，或者用于特殊情况（如 U 盘不是 `/dev/sdX` 的情况等）。PATH 下应当有开机时的三个功能需要的文件。
 2. `mlt --mount-dev(或 -m) PATH` 挂载 dev, proc, sys 到 chroot 目录。相当于：
 
    ```bash

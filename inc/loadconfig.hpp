@@ -19,7 +19,7 @@ private:
 	DIR* cfgDir;
 	struct DeviceItem
 	{
-		enum fstype { VFAT, EXFAT, EXT4, XFS, BTRFS, ISO9660, OTHER };
+		enum fstype { VFAT, EXFAT, EXT4, XFS, BTRFS, ISO9660, NTFS, OTHER };
 		string deviceName;
 		string deviceLabel;
 		fstype		deviceFSType;

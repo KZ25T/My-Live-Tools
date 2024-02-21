@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+using std::format;
 /**
  * @brief create a new device item
  *
@@ -113,7 +114,7 @@ LoadConfig::GetDevices::GetDevices() {
  */
 bool LoadConfig::GetDevices::GetMountedList() {
 	std::ifstream mounts("/proc/self/mounts", std::ios_base::in);
-	string	  mountedBlock;
+	string		  mountedBlock;
 	if (mounts.bad()) return false;
 	while (true) {
 		char buf[160];
@@ -167,8 +168,16 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 		if (item.deviceLabel == "Ventoy" &&
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount ventoy
-			int mounterr = mount(
-				item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY, nullptr);
+			int mounterr = 1;
+			if (item.deviceFSType == DeviceItem::fstype::NTFS) {
+				mounterr =
+					runCMD(format("ntfs-3g {} {} -o ro", item.deviceName, mntPoint));
+			}
+			else {
+				mounterr = mount(
+					item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY,
+					nullptr);
+			}
 			if (mounterr != 0) break;
 			if ((dp = opendir(cfgPoint)) != nullptr) {
 				// exist!
@@ -186,8 +195,16 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 		if (item.deviceLabel != "Ventoy" && item.deviceLabel != "VOTEFI" &&
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount fs
-			int mounterr = mount(
-				item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY, nullptr);
+			int mounterr = 1;
+			if (item.deviceFSType == DeviceItem::fstype::NTFS) {
+				mounterr =
+					runCMD(format("ntfs-3g {} {} -o ro", item.deviceName, mntPoint));
+			}
+			else {
+				mounterr = mount(
+					item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY,
+					nullptr);
+			}
 			if (mounterr != 0) continue;
 			if ((dp = opendir(cfgPoint)) != nullptr) {
 				// exist!

@@ -86,7 +86,7 @@ This system supports the following functions:
 ### 5.2 Startup Brief usage method
 
 1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, it is recommended to place it in the Ventoy partition, and you shouled not place it in VOTEFI partition.
-   Requirement: The file system format for this partition is one of vfat (fat32), exfat, ext4, xfs, btrfs, or iso9660 (usually exfat for USB drives), and cannot be in ntfs format.
+   Requirement: The file system format for this partition is one of vfat (fat32), exfat, ext4, xfs, btrfs, iso9660, or ntfs(usually exfat for USB drives). We run `ntfs-3g` when mounting ntfs, other filesystem type are mounted by system call.
 2. Create a directory in this partition called `.live` with an absolute path of `/home/mount/point/.live`
 3. If you need to use the first function:
    - Find a working directory, such as workfolder
@@ -126,7 +126,7 @@ This system supports the following functions:
 
 ### 5.3 Other functions
 
-1. `mlt --config-path(or -c) PATH` siecify configure file path, when`.live/OSname` does not exist, you can use this option to complete. The three files/folder should under PATH.
+1. `mlt --config-path(or -c) PATH` siecify configure file path, when`.live/OSname` does not exist, or in special conditions like USB drive is not `/dev/sdX`, you can use this option to complete. The three files/folder should under PATH.
 2. `mlt --mount-dev(or -m) PATH` mounts dev, proc, sys to chroot path. The same as:
 
    ```bash
