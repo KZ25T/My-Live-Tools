@@ -90,7 +90,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 
 1. 在装有本系统镜像的 U 盘上，任选一个分区装载本工具的资源文件。如果您是用 Ventoy 装载的镜像，那么建议放在 Ventoy 分区内（也就是 iso 文件所在的位置），不要放在 VOTEFI 分区内。
    要求：此分区的文件系统格式为 vfat(fat32), exfat, ext4, xfs, btrfs, iso9660, ntfs 中的一个（一般 U 盘是 exfat），其中 ntfs 调用 ntfs-3g 命令，其他的进行系统调用。
-2. 在该分区中创建一个目录 `.live`，其绝对路径为 `/some/mount/point/.live`
+2. 在该分区中创建一个目录 `.live`，其绝对路径为 `/some/mount/point/.live/操作系统名`（操作系统名如 debian 或 kali 等）
 3. 若需要使用第一个功能：
    - 找一个工作目录，如 workfolder
    - 创建根目录：`mkdir rootfs`
@@ -109,7 +109,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
      6 directories, 2 files
      ```
 
-   - 打包：`cd rootfs && zip /some/mount/point/.live/overlay.zip -r .`，即产生 `overlay.zip` 放在 .live 下。
+   - 打包：`cd rootfs && zip /some/mount/point/.live/操作系统名/overlay.zip -r .`，即产生 `overlay.zip` 放在 .live 下。
    - 暂不支持加密的 zip 包，或其他的高级设置。
    - 尽量不要在 Windows 上产生该压缩包。如果该压缩包用 Windows 产生，请保证双击打开后即为根目录（可见 home 或 usr 等），且不要使用中文路径或文件名。
    - 提示：如果你是 Ventoy 用户，那么 Ventoy 有类似的功能（但实现原理和我的不一样），参考[相关说明](https://www.ventoy.net/cn/doc_live_injection.html)。（我的功能未经过完备测试，Ventoy 的测试肯定比我强）
@@ -120,12 +120,12 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
      - 提供 ssh/gpg 密钥配置：`/home/user/.ssh/` 或 `/home/user/.gnupg/` 使得开机后就能直接 ssh 等。**安全提示：如安装此配置，请谨防相关文件泄漏。**
      - 提供 wifi 配置：`/etc/NetworkManager/system-connections/WIFI名字.nmconnection` 可以开机之后自动连接 wifi
 4. 若需使用第二个功能：
-   - 创建目录：`mkdir /some/mount/point/.live/packages`
+   - 创建目录：`mkdir /some/mount/point/.live/操作系统名/packages`
    - 将需要安装的 deb 包添加至以上目录内。
    - 本人调用 dpkg 安装，不能使用 apt 处理依赖，请记得下载完整依赖。
    - 小技巧：`apt depends xxx` 查看依赖（请递归查询），`apt download xxx` 下载软件源里的 deb 包。请注意依赖关系及依赖版本，所以最好使用没有依赖的包，比如 wps。
 5. 若需使用第三个功能：
-   - 将脚本复制为 `/some/mount/point/.live/startup-scripts`
+   - 将脚本复制为 `/some/mount/point/.live/操作系统名/startup-scripts`
 
 ### 5.3其他功能
 
@@ -154,8 +154,8 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 
 ### 5.4注意事项
 
-1. 本程序的启动时功能只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live` 目录的分区（且满足上文文件系统）为止。
-2. 在启动时本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。`.live` 下的所有文件必须为常规文件或目录，不能为链接等。
+1. 本程序的启动时功能只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live/操作系统名` 目录的分区（且满足上文文件系统）为止。
+2. 在启动时本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。`.live/操作系统名` 下的所有文件必须为常规文件或目录，不能为链接等。
 3. 使用启动时第一个功能时，不能在某个位置以文件覆盖目录，或者以目录覆盖文件。
 4. 启动时的三个功能依次进行，当且仅当能探测到所需文件时才运行。
 5. 此工具位置为：`/usr/bin/mlt`，为静态编译程序。

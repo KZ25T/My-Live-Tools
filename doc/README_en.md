@@ -87,7 +87,7 @@ This system supports the following functions:
 
 1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, it is recommended to place it in the Ventoy partition, and you shouled not place it in VOTEFI partition.
    Requirement: The file system format for this partition is one of vfat (fat32), exfat, ext4, xfs, btrfs, iso9660, or ntfs(usually exfat for USB drives). We run `ntfs-3g` when mounting ntfs, other filesystem type are mounted by system call.
-2. Create a directory in this partition called `.live` with an absolute path of `/home/mount/point/.live`
+2. Create a directory in this partition called `.live` with an absolute path of `/Some/mount/point/.live/OSNAME`(OSNAME is like `debian` or `kali` and so on)
 3. If you need to use the first function:
    - Find a working directory, such as workfolder
    - Create Root Directory: `mkdir rootfs`
@@ -106,7 +106,7 @@ This system supports the following functions:
      6 directories, 2 files
      ```
 
-   - Packaging: `cd rootfs && zip /home/mount/point/.live/overlay.zip -r .`
+   - Packaging: `cd rootfs && zip /home/mount/point/OSNAME/.live/overlay.zip -r .`
    - Encrypted zip packages or other advanced settings are not currently supported.
    - Try not to generate this compressed file on Windows. If the compressed file is generated using Windows, please ensure that when opened by double clicking, it becomes the root directory (visible as home or usr, etc.), and do not use Chinese paths or file names.
    - Tip: If you are a Ventoy user, then Ventoy has similar functions (but the implementation principle is different from mine), please refer to [relevant instructions](https://www.ventoy.net/en/doc_live_injection.html). (My functionality has not been fully tested, Ventoy's testing is definitely stronger than mine)
@@ -117,12 +117,12 @@ This system supports the following functions:
      - Provide SSH/GPG key configuration: `/home/user/.ssh/` or `/home/user/.gnupg/` to enable direct SSH after startup. **Safety reminder: If installing this configuration, please be careful to prevent related file leaks.**
      - Provide WiFi configuration: `/etc/NetworkManager/system connections/WIFI_NAME.nmconnection` can automatically connect to WiFi after startup.
 4. If you need to use the second function:
-   - Create directory: `mkdir /home/mount/point/.live/packages`
+   - Create directory: `mkdir /home/mount/point/.live/OSNAME/packages`
    - Add the deb package that needs to be installed to the above directory.
    - I am calling dpkg installation and cannot use APT to handle dependencies. Please remember to download the complete dependencies.
    - Tips: `apt dependencies xxx` View dependencies (please recursively query), `apt download xxx` Download the deb package from the software source. Please pay attention to dependency relationships and dependent versions, so it is suggested to use packages without dependencies, such as WPS office(a popular doc/xls/ppt editor in China).
 5. If you need to use the third function:
-   - Copy script as `/home/mount/point/. live/startup scripts`
+   - Copy script as `/home/mount/point/. live/OSNAME/startup scripts`
 
 ### 5.3 Other functions
 
@@ -151,8 +151,8 @@ This system supports the following functions:
 
 ### 5.4 Precautions
 
-1. This program starting-up functions only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live` directory is found (and meets the file system requirements mentioned above).
-2. When running this program on starting up, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live` must be regular file or direction, can not be links.
+1. This program starting-up functions only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live/OSNAME` directory is found (and meets the file system requirements mentioned above).
+2. When running this program on starting up, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live/OSNAME` must be regular file or direction, can not be links.
 3. When using the first starting-up function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
 4. The three starting-up functions are performed sequentially and only run when the required file can be detected.
 5. The location of this tool is `/usr/bin/mlt`, which is a static compiled program.
