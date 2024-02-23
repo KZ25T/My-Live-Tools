@@ -42,11 +42,11 @@ void displayHelp(const char* cmd0) {
 		cmd0, PLATFORM);
 	printf(
 		"%s --mount-dev(or -m) ROOTPATH:  "	 // cmds
-		"mount /proc, /sys, /dev, /run, /dev/shm on ROOTPATH\n",
+		"mount  /proc, /sys, /dev, /run, /dev/shm on ROOTPATH\n",
 		cmd0);
 	printf(
 		"%s --umount-dev(or -u) ROOTPATH: "	 // cmds
-		"umount /proc, /sys, /dev, /run, /dev/shm on ROOTPATH(maybe failed)\n",
+		"umount /proc, /sys, /dev, /run, /dev/shm on ROOTPATH\n",
 		cmd0);
 
 	return;
@@ -81,27 +81,27 @@ int main(int argc, const char* argv[]) {
 					}
 				}
 			}
-				//                          _ooOoo_                               //
-				//                         o8888888o                              //
-				//                         88" . "88                              //
-				//                         (| ^_^ |)                              //
-				//                         O\  =  /O                              //
-				//                      ____/`---'\____                           //
-				//                    .'  \\|     |//  `.                         //
-				//                   /  \\|||  :  |||//  \                        //
-				//                  /  _||||| -:- |||||-  \                       //
-				//                  |   | \\\  -  /// |   |                       //
-				//                  | \_|  ''\---/''  |   |                       //
-				//                  \  .-\__  `-`  ___/-. /                       //
-				//                ___`. .'  /--.--\  `. . ___                     //
-				//              ."" '<  `.___\_<|>_/___.'  >'"".                  //
-				//            | | :  `- \`.;`\ _ /`;.`/ - ` : | |                 //
-				//            \  \ `-.   \_ __\ /__ _/   .-` /  /                 //
-				//      ========`-.____`-.___\_____/___.-`____.-'========         //
-				//                           `=---='                              //
-				//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        //
-				//  Buddha blesses us to never shut down and never have any bugs  //
-				if (status != 0) {
+			//                          _ooOoo_                               //
+			//                         o8888888o                              //
+			//                         88" . "88                              //
+			//                         (| ^_^ |)                              //
+			//                         O\  =  /O                              //
+			//                      ____/`---'\____                           //
+			//                    .'  \\|     |//  `.                         //
+			//                   /  \\|||  :  |||//  \                        //
+			//                  /  _||||| -:- |||||-  \                       //
+			//                  |   | \\\  -  /// |   |                       //
+			//                  | \_|  ''\---/''  |   |                       //
+			//                  \  .-\__  `-`  ___/-. /                       //
+			//                ___`. .'  /--.--\  `. . ___                     //
+			//              ."" '<  `.___\_<|>_/___.'  >'"".                  //
+			//            | | :  `- \`.;`\ _ /`;.`/ - ` : | |                 //
+			//            \  \ `-.   \_ __\ /__ _/   .-` /  /                 //
+			//      ========`-.____`-.___\_____/___.-`____.-'========         //
+			//                           `=---='                              //
+			//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        //
+			//  Buddha blesses us to never shut down and never have any bugs  //
+			if (status != 0) {
 				printf("file detect and install failed in %d!", status);
 				return status;
 			}
@@ -137,9 +137,9 @@ int main(int argc, const char* argv[]) {
 		if (strcmp(argv[1], "--umount-dev") == 0 || strcmp(argv[1], "-u") == 0) {
 			printf("see https://wiki.archlinux.org/title/Chroot#Using_chroot \n");
 			runCMD(format("umount {}/dev/shm", argv2));
-			runCMD(format("umount --make-rslave {}/run/", argv2));
+			runCMD(format("mount --make-rslave {}/run/", argv2));
 			runCMD(format("umount -R {}/run/", argv2));
-			runCMD(format("umount --make-rslave {}/dev/", argv2));
+			runCMD(format("mount --make-rslave {}/dev/", argv2));
 			runCMD(format("umount -R {}/dev/", argv2));
 			runCMD(format("umount {}/sys/", argv2));
 			runCMD(format("umount {}/proc", argv2));

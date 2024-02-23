@@ -142,9 +142,9 @@ This system supports the following functions:
 
    ```bash
    umount ${PATH}/dev/shm
-   umount --make-rslave ${PATH}/run/
+   mount --make-rslave ${PATH}/run/
    umount -R ${PATH}/run/
-   umount --make-rslave ${PATH}/dev/
+   mount --make-rslave ${PATH}/dev/
    umount -R ${PATH}/dev/
    umount ${PATH}/sys/
    umount ${PATH}/proc

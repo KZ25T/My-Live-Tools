@@ -76,7 +76,7 @@ void runProg(DIR* dirPtr, const char* dirPath, bool redirect) {
 	if (RunOverlay == true) {
 		// unzip rootfs target
 		const char* log = redirect ? ">/var/log/mlt.2.log 2>&1" : "";
-		string		cmd = format("unzip -o {}/overlay.zip -d / {}", dirPath, log);
+		string		cmd = format("unzip -Xo {}/overlay.zip -d / {}", dirPath, log);
 		runCMD(cmd);
 	}
 	if (RunDEBPack == true) {
