@@ -22,7 +22,7 @@ private:
 		enum fstype { VFAT, EXFAT, EXT4, XFS, BTRFS, ISO9660, NTFS, OTHER };
 		string deviceName;
 		string deviceLabel;
-		fstype		deviceFSType;
+		fstype deviceFSType;
 		DeviceItem(blkid_dev device);
 		const char* GetFSStr();
 		void		print(std::ostream& os);
@@ -36,6 +36,6 @@ private:
 
 	private:
 		vector<DeviceItem> deviceList;
-		string				USBDeviceName;
+		string			   USBDeviceName;
 	};
 };

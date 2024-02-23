@@ -6,7 +6,7 @@
 
 #include "loadconfig.hpp"
 #include "runprog.hpp"
-#include <format>
+#include "format.hpp"
 constexpr const char* mntPoint = __mountpoint;
 constexpr const char* cfgPoint = __mountpoint "/.live/" PLATFORM;
 using std::string;

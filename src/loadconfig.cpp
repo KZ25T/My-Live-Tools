@@ -5,7 +5,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-using std::format;
 /**
  * @brief create a new device item
  *
@@ -155,7 +154,10 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 		// mountpoint does not exist
 		mkdir(mntPoint, S_IRWXU);
 	else {
-		if (readdir(dp) != nullptr) {
+		// test if it is empty
+		int mntPointSubCount = 0;
+		while (readdir(dp) != nullptr) mntPointSubCount++;
+		if (mntPointSubCount != 2) {
 			// mountpoint is not empty
 			std::cout << "error: folder exists" << std::endl;
 			closedir(dp);

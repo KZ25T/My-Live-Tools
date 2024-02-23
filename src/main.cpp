@@ -1,5 +1,4 @@
 #include "main.hpp"
-using std::format;
 bool beginWith(const char* _str, const char* head) {
 	while (*head != 0) {
 		if (*_str != *head) return false;
@@ -60,15 +59,18 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	}
 	if (argc == 2) {
+		if (strcmp(argv[1], "--begining") == 0 || strcmp(argv[1], "-b") == 0) {
+			runCMD("mlt --startup");
+			runCMD(format("umount {}", mntPoint));
+			runCMD(format("rmdir {}", mntPoint));
+		}
 		if (strcmp(argv[1], "--startup") == 0 || strcmp(argv[1], "-s") == 0) {
 			// run while starting up
 			LoadConfig ld;
 			if (ld.success()) {
 				printf("founded .live!\n");
-				runProg(ld.getDir(), cfgPoint, true);
-				sleep(1);
-				int err = umount(cfgPoint);
-				if (err != 0) printf("umount err: %d\n", err);
+				DIR* dir = ld.getDir();
+				runProg(dir, cfgPoint, true);
 			}
 			return 0;
 		}
