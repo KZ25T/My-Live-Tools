@@ -65,7 +65,8 @@ int main(int argc, const char* argv[]) {
 			LoadConfig ld;
 			if (ld.success()) {
 				printf("founded .live!\n");
-				// runProg(ld.getDir(), cfgPoint, true);
+				runProg(ld.getDir(), cfgPoint, true);
+				sleep(1);
 				int err = umount(cfgPoint);
 				if (err != 0) printf("umount err: %d\n", err);
 			}

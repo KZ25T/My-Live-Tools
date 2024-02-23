@@ -6,8 +6,9 @@ OBJ = $(patsubst %.cpp, $(SRC_DIR)/%.o, $(notdir $(SRC)))
 
 TARGET = mlt
 
+PLATFORM = debian
 CXX = g++
-CXXFLAGS = --static -lblkid -std=c++20 -Wall -Wextra -Os -DPLATFORM=\"debian\"
+CXXFLAGS = --static -lblkid -std=c++20 -Wall -Wextra -Os -DPLATFORM=\"$(PLATFORM)\"
 
 $(TARGET):$(OBJ)
 	$(CXX) $(OBJ) $(CXXFLAGS) -o $@

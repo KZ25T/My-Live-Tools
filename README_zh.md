@@ -12,4 +12,6 @@
 
 预装：`sudo apt install libblkid1 libblkid-dev`
 
+编辑 `Makefile` 第 9 行，修改为自己的操作系统名。
+
 `make`，使用 `make clean` 清理编译文件。
