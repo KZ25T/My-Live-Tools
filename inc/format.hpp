@@ -1,4 +1,15 @@
 #pragma once
+#if (defined(__GNUC__) && __GNUC__ >= 13) ||                                             \
+	(defined(__clang__) && (__clang_major__ >= 14))
+// if gcc>=13 or clang>=14, it supports std::format
+#include <format>
+using std::format;
+
+#else
+// Compiler does not support std::format
+// We have to impliment it ourselves
+// Code from: https://github.com/xhawk18/50print/blob/master/mini_format.h
+// Thanks for the origin author.
 #include <functional>
 #include <sstream>
 #include <vector>
@@ -24,11 +35,7 @@ template <typename Arg> inline arg_builder_t mini_format_arg(const Arg& arg) {
 }
 
 template <typename... Args>
-inline std::string mini_format(const std::string& fmt, const Args&... args) {
+std::string format(const std::string& fmt, const Args&... args) {
 	return mini_format_impl(fmt, {mini_format_arg(args)...});
 }
-
-template <typename... Args>
-std::string format(const std::string& fmt, const Args... args) {
-	return mini_format(fmt, args...);
-}
+#endif
