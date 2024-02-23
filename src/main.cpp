@@ -46,7 +46,7 @@ void displayHelp(const char* cmd0) {
 		cmd0);
 	printf(
 		"%s --umount-dev(or -u) ROOTPATH: "	 // cmds
-		"umount /proc, /sys, /dev, /run, /dev/shm on ROOTPATH\n",
+		"umount /proc, /sys, /dev, /run, /dev/shm on ROOTPATH(maybe failed)\n",
 		cmd0);
 
 	return;
@@ -59,19 +59,54 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	}
 	if (argc == 2) {
-		if (strcmp(argv[1], "--begining") == 0 || strcmp(argv[1], "-b") == 0) {
-			runCMD("mlt --startup");
-			runCMD(format("umount {}", mntPoint));
-			runCMD(format("rmdir {}", mntPoint));
-		}
 		if (strcmp(argv[1], "--startup") == 0 || strcmp(argv[1], "-s") == 0) {
 			// run while starting up
-			LoadConfig ld;
-			if (ld.success()) {
-				printf("founded .live!\n");
-				DIR* dir = ld.getDir();
-				runProg(dir, cfgPoint, true);
+			pid_t pid	 = fork();
+			int	  status = 0;
+			if (pid == 0) {
+				// I don't know why we need a new PID to run syscall
+				LoadConfig ld;
+				if (ld.success()) {
+					printf("detected config file!\n");
+					DIR* dir = ld.getDir();
+					runProg(dir, cfgPoint, true);
+				}
+				return 0;
 			}
+			else {
+				while (waitpid(pid, &status, 0) < 0) {
+					if (errno != EINTR) {
+						status = -1;
+						break;
+					}
+				}
+			}
+				//                          _ooOoo_                               //
+				//                         o8888888o                              //
+				//                         88" . "88                              //
+				//                         (| ^_^ |)                              //
+				//                         O\  =  /O                              //
+				//                      ____/`---'\____                           //
+				//                    .'  \\|     |//  `.                         //
+				//                   /  \\|||  :  |||//  \                        //
+				//                  /  _||||| -:- |||||-  \                       //
+				//                  |   | \\\  -  /// |   |                       //
+				//                  | \_|  ''\---/''  |   |                       //
+				//                  \  .-\__  `-`  ___/-. /                       //
+				//                ___`. .'  /--.--\  `. . ___                     //
+				//              ."" '<  `.___\_<|>_/___.'  >'"".                  //
+				//            | | :  `- \`.;`\ _ /`;.`/ - ` : | |                 //
+				//            \  \ `-.   \_ __\ /__ _/   .-` /  /                 //
+				//      ========`-.____`-.___\_____/___.-`____.-'========         //
+				//                           `=---='                              //
+				//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        //
+				//  Buddha blesses us to never shut down and never have any bugs  //
+				if (status != 0) {
+				printf("file detect and install failed in %d!", status);
+				return status;
+			}
+			umount(mntPoint);
+			rmdir(mntPoint);
 			return 0;
 		}
 		if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {

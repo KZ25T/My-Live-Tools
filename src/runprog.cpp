@@ -45,6 +45,7 @@ void runProg(DIR* dirPtr, const char* dirPath, bool redirect) {
 		dirPath		  = tmp;
 	}
 	// after process args
+	// judge which option to run
 	dirent* entry	   = nullptr;
 	bool	RunPreScr  = false;
 	bool	RunOverlay = false;
@@ -65,6 +66,7 @@ void runProg(DIR* dirPtr, const char* dirPath, bool redirect) {
 		}
 	}
 	closedir(dirPtr);
+	// run those options
 	if (RunPreScr == true) {
 		// run startup scripts
 		const char* log = redirect ? ">/var/log/mlt.1.log 2>&1" : "";
