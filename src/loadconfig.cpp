@@ -194,7 +194,7 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 	}
 	// get other device name
 	for (auto item : deviceList) {
-		if (item.deviceLabel != "Ventoy" && item.deviceLabel != "VOTEFI" &&
+		if (item.deviceLabel != "Ventoy" && item.deviceLabel != "VOTYEFI" &&
 			item.deviceFSType != DeviceItem::fstype::OTHER) {
 			// mount fs
 			int mounterr = 1;

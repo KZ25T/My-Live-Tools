@@ -10,14 +10,14 @@ English Version:[GitHub](https://github.com/KZ25T/My-Live-Tools/blob/master/doc/
 
 ## 1.用户密码
 
-用户 `root` 和 `user` 的密码都是 `passwd`
+用户 `root` 和 `user` 都没有密码，sudo 也不需要密码，需要密码请自己添加。
 
 ## 2.基本信息
 
 系统基本信息：
 
 - 架构：amd64, x86_64
-- 发行版：Debian 12.4
+- 发行版：Debian 12.5
 - 内核版本：6.1.0
 - 图形桌面：xfce4
 - 登录管理器：lightdm（已配置为自动登录）
@@ -131,7 +131,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
 ### 5.3其他功能
 
 1. `mlt --config-path(或 -c) PATH` 指定配置文件路径，用于当开机时功能所需要的文件不在 `.live/操作系统名` 下时完成此功能，或者用于特殊情况（如 U 盘不是 `/dev/sdX` 的情况等）。PATH 下应当有开机时的三个功能需要的文件。
-2. `mlt --mount-dev(或 -m) PATH` 挂载 dev, proc, sys 到 chroot 目录。相当于：
+2. `mlt --mount-dev(或 -m) PATH` 挂载 dev, proc, sys 到 chroot 目录。这对于需要运行 chroot 修复的操作系统很有帮助。相当于：
 
    ```bash
    mount -t proc  /proc ${PATH}/proc/
@@ -153,15 +153,13 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
    umount ${PATH}/proc
    ```
 
-   提醒：目前看来貌似挂载上去之后就卸不下来了。
-
 ### 5.4注意事项
 
 1. 本程序的启动时功能只查找装有此 Livecd 镜像的 U 盘的分区，查找顺序为：首先查找标签为 Ventoy 的分区，然后按照编号数字顺序查找 U 盘其他分区（标签不是 Ventoy 或 VOTEFI），直到查找到含有 `.live/操作系统名` 目录的分区（且满足上文文件系统）为止。
 2. 在启动时本程序运行时，权限为 root，所有挂载的分区为只读挂载。相关内容我只对目录、文件进行了测试，尚不知道对于链接等文件是否会产生不良副作用。`.live/操作系统名` 下的所有文件必须为常规文件或目录，不能为链接等。
 3. 使用启动时第一个功能时，不能在某个位置以文件覆盖目录，或者以目录覆盖文件。
 4. 启动时的运行顺序为：`preScript`→功能1→功能2→`postScript`，当且仅当能探测到所需文件时才运行。
-5. 此工具位置为：`/usr/bin/mlt`，为静态编译程序。
+5. 此工具位置为：`/usr/local/bin/mlt`，为静态编译程序。
 6. 开机运行此工具时，`.live` 的位置是 `/tmp/mountpoint/.live`（编写脚本时，如有需要，可以参考）
 
 ### 5.5工具源码

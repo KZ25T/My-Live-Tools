@@ -10,14 +10,14 @@ This livecd is an open-source version created by Linux enthusiasts, mainly aimed
 
 ## 1.User password
 
-The passwords for users `root` and `user` are both `passwd`.
+No passwords for users `root` and `user` and `sudo` command. Please add password by yourself if needed.
 
 ## 2.Basic information
 
 Basic system information:
 
 - Architecture: amd64, x86_64
-- Release: Debian 12.4
+- Release: Debian 12.5
 - Kernel version: 6.1.0
 - Graphics desktop: xfce4
 - Login manager: lightdm (configured for automatic login)
@@ -156,7 +156,7 @@ This system supports the following functions:
 2. When running this program on starting up, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live/OSNAME` must be regular file or direction, can not be links.
 3. When using the first starting-up function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
 4. The performed order is: `preScript` -> `Function1` -> `Function2` -> `postScript`, and only run when the required file can be detected.
-5. The location of this tool is `/usr/bin/mlt`, which is a static compiled program.
+5. The location of this tool is `/usr/local/bin/mlt`, which is a static compiled program.
 6. While starting up and running this program, the loaction of `.live` is `/tmp/mountpoint/.live`(you can refer while writing scripts if needed.)
 
 ### 5.5 Tool source code
