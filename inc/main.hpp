@@ -16,3 +16,4 @@ int	 runCMD(const char* cmd);
 int	 runCMD(const string& cmd);
 bool beginWith(const char* str, const char* head);
 bool endWith(const char* str, const char* end);
+bool streql(const char* _a, const char* _b);

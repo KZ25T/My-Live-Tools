@@ -52,16 +52,16 @@ void runProg(DIR* dirPtr, const char* dirPath, bool redirect) {
 	bool	RunDEBPack = false;
 	bool	RunPostScr = false;
 	while ((entry = readdir(dirPtr)) != nullptr) {
-		if (entry->d_type == DT_REG && strcmp(entry->d_name, "preScript") == 0) {
+		if (entry->d_type == DT_REG && streql(entry->d_name, "preScript")) {
 			RunPreScr = true;
 		}
-		if (entry->d_type == DT_REG && strcmp(entry->d_name, "overlay.zip") == 0) {
+		if (entry->d_type == DT_REG && streql(entry->d_name, "overlay.zip")) {
 			RunOverlay = true;
 		}
-		if (entry->d_type == DT_DIR && strcmp(entry->d_name, "packages") == 0) {
+		if (entry->d_type == DT_DIR && streql(entry->d_name, "packages")) {
 			RunDEBPack = true;
 		}
-		if (entry->d_type == DT_REG && strcmp(entry->d_name, "postScript") == 0) {
+		if (entry->d_type == DT_REG && streql(entry->d_name, "postScript")) {
 			RunPostScr = true;
 		}
 	}

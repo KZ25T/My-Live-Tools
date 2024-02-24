@@ -17,23 +17,25 @@ LoadConfig::DeviceItem::DeviceItem(blkid_dev device) {
 	blkid_tag_iterate iter = blkid_tag_iterate_begin(device);
 	const char *	  type, *value;
 	while (blkid_tag_next(iter, &type, &value) == 0) {
-		if (strcmp(type, "LABEL") == 0) {
+		if (streql(type, "LABEL")) {
 			deviceLabel = string(value);
 			continue;
 		}
-		if (strcmp(type, "TYPE") == 0) {
-			if (strcmp(value, "vfat") == 0)
+		if (streql(type, "TYPE")) {
+			if (streql(value, "vfat"))
 				deviceFSType = VFAT;
-			else if (strcmp(value, "exfat") == 0)
+			else if (streql(value, "exfat"))
 				deviceFSType = EXFAT;
-			else if (strcmp(value, "ext4") == 0)
+			else if (streql(value, "ext4"))
 				deviceFSType = EXT4;
-			else if (strcmp(value, "xfs") == 0)
+			else if (streql(value, "xfs"))
 				deviceFSType = XFS;
-			else if (strcmp(value, "btrfs") == 0)
+			else if (streql(value, "btrfs"))
 				deviceFSType = BTRFS;
-			else if (strcmp(value, "iso9660") == 0)
+			else if (streql(value, "iso9660"))
 				deviceFSType = ISO9660;
+			else if (streql(value, "ntfs"))
+				deviceFSType = NTFS;
 			else
 				deviceFSType = OTHER;
 		}
@@ -53,6 +55,7 @@ const char* LoadConfig::DeviceItem::GetFSStr() {
 		case XFS: return "xfs";
 		case BTRFS: return "btrfs";
 		case ISO9660: return "iso9660";
+		case NTFS: return "ntfs";
 		default: return "other";
 	}
 }
@@ -72,6 +75,12 @@ void LoadConfig::DeviceItem::print(std::ostream& os) {
  * @return false
  */
 bool LoadConfig::DeviceItem::operator<(const DeviceItem& another) {
+	// first compare device name
+	int ldev = deviceName[7];
+	int rdev = another.deviceName[7];
+	if (ldev < rdev) return true;
+	if (ldev > rdev) return false;
+	// if device name equals, compare part order
 	int lval = atoi(deviceName.c_str() + 8);  // 8: /dev/sdx
 	int rval = atoi(another.deviceName.c_str() + 8);
 	if (lval < rval)
@@ -86,8 +95,8 @@ bool LoadConfig::DeviceItem::operator<(const DeviceItem& another) {
 LoadConfig::GetDevices::GetDevices() {
 	USBDeviceName = "";
 	// Get Mounted devices
-	if (GetMountedList() == false) return;
-	blkid_cache cache = nullptr;
+	bool		normalOrVentoy = GetMountedList();	// true if normal, false maybe Ventoy
+	blkid_cache cache		   = nullptr;
 	if (blkid_get_cache(&cache, nullptr) < 0) return;
 	blkid_probe_all(cache);
 	blkid_dev		  dev;
@@ -97,7 +106,9 @@ LoadConfig::GetDevices::GetDevices() {
 		dev = blkid_verify(cache, dev);
 		if (!dev) continue;
 		// should be the same usb device
-		if (beginWith(blkid_dev_devname(dev), USBDeviceName.c_str()) == true)
+		const char* devName = blkid_dev_devname(dev);
+		if (beginWith(devName, USBDeviceName.c_str()) == true ||
+			(normalOrVentoy == false && beginWith(devName, "/dev/sd") == true))
 			deviceList.push_back({dev});
 	}
 	std::sort(deviceList.begin(), deviceList.end());
@@ -126,7 +137,7 @@ bool LoadConfig::GetDevices::GetMountedList() {
 			*p = 0;
 			// have collected mounted block
 			if (mountedBlock.size() != 0) {
-				if (strcmp(buf, mountedBlock.c_str()) != 0)
+				if (streql(buf, mountedBlock.c_str()) == false)
 					// this is not what have collected
 					// should not happen
 					return false;
@@ -165,34 +176,7 @@ DIR* LoadConfig::GetDevices::GetConfigFile() {
 		}
 		// mountpoint is empty
 	}
-	// get device name, first search Ventoy(should be only one Ventoy in one USB)
-	for (auto item : deviceList) {
-		if (item.deviceLabel == "Ventoy" &&
-			item.deviceFSType != DeviceItem::fstype::OTHER) {
-			// mount ventoy
-			int mounterr = 1;
-			if (item.deviceFSType == DeviceItem::fstype::NTFS) {
-				mounterr =
-					runCMD(format("ntfs-3g {} {} -o ro", item.deviceName, mntPoint));
-			}
-			else {
-				mounterr = mount(
-					item.deviceName.c_str(), mntPoint, item.GetFSStr(), MS_RDONLY,
-					nullptr);
-			}
-			if (mounterr != 0) break;
-			if ((dp = opendir(cfgPoint)) != nullptr) {
-				// exist!
-				return dp;
-			}
-			else {
-				// do not exist, umount, try other all fs.
-				umount(mntPoint);
-				break;
-			}
-		}
-	}
-	// get other device name
+	// get other device name, and it could not be ventoy or votyefi
 	for (auto item : deviceList) {
 		if (item.deviceLabel != "Ventoy" && item.deviceLabel != "VOTYEFI" &&
 			item.deviceFSType != DeviceItem::fstype::OTHER) {

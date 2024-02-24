@@ -1,4 +1,11 @@
 #include "main.hpp"
+bool streql(const char* _a, const char* _b) {
+	if (strcmp(_a, _b) == 0)
+		return true;
+	else
+		return false;
+}
+
 bool beginWith(const char* _str, const char* head) {
 	while (*head != 0) {
 		if (*_str != *head) return false;
@@ -11,7 +18,7 @@ bool beginWith(const char* _str, const char* head) {
 bool endWith(const char* _str, const char* end) {
 	int L_str = strlen(_str);
 	int L_end = strlen(end);
-	if (strcmp(_str + (L_str - L_end), end) == 0)
+	if (streql(_str + (L_str - L_end), end))
 		return true;
 	else
 		return false;
@@ -59,7 +66,7 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	}
 	if (argc == 2) {
-		if (strcmp(argv[1], "--startup") == 0 || strcmp(argv[1], "-s") == 0) {
+		if (streql(argv[1], "--startup") || streql(argv[1], "-s")) {
 			// run while starting up
 			pid_t pid	 = fork();
 			int	  status = 0;
@@ -109,7 +116,7 @@ int main(int argc, const char* argv[]) {
 			rmdir(mntPoint);
 			return 0;
 		}
-		if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
+		if (streql(argv[1], "--help") || streql(argv[1], "-h")) {
 			displayHelp(argv[0]);
 			return 0;
 		}
@@ -121,11 +128,11 @@ int main(int argc, const char* argv[]) {
 	if (argc == 3) {
 		string argv2(argv[2]);
 		if (*argv2.rbegin() == '/') argv2.erase(argv2.end() - 1);
-		if (strcmp(argv[1], "--config-path") == 0 || strcmp(argv[1], "-c") == 0) {
+		if (streql(argv[1], "--config-path") || streql(argv[1], "-c")) {
 			runProg(nullptr, argv2.c_str(), false);
 			return 0;
 		}
-		if (strcmp(argv[1], "--mount-dev") == 0 || strcmp(argv[1], "-m") == 0) {
+		if (streql(argv[1], "--mount-dev") || streql(argv[1], "-m")) {
 			printf("see https://wiki.archlinux.org/title/Chroot#Using_chroot \n");
 			runCMD(format("mount -t proc  /proc {}/proc/", argv2));
 			runCMD(format("mount -t sysfs /sys  {}/sys/", argv2));
@@ -134,7 +141,7 @@ int main(int argc, const char* argv[]) {
 			runCMD(format("mount -t tmpfs  shm  {}/dev/shm/", argv2));
 			return 0;
 		}
-		if (strcmp(argv[1], "--umount-dev") == 0 || strcmp(argv[1], "-u") == 0) {
+		if (streql(argv[1], "--umount-dev") || streql(argv[1], "-u")) {
 			printf("see https://wiki.archlinux.org/title/Chroot#Using_chroot \n");
 			runCMD(format("umount {}/dev/shm", argv2));
 			runCMD(format("mount --make-rslave {}/run/", argv2));

@@ -85,7 +85,7 @@ This system supports the following functions:
 
 ### 5.2 Startup Brief usage method
 
-1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, it is recommended to place it in the Ventoy partition, and you shouled not place it in VOTEFI partition.
+1. On the USB drive with the system image installed, select any partition to load the resource files of this tool. If you are mounting the image using Ventoy, you shouled not place it in Ventoy(where place the iso files) or VOTYEFI partition.(Tips: you can reserve some place when install Ventoy by adjusting options, and this place can be used to format as a partitation to place the resource file required by this tool.)
    Requirement: The file system format for this partition is one of vfat (fat32), exfat, ext4, xfs, btrfs, iso9660, or ntfs(usually exfat for USB drives). We run `ntfs-3g` when mounting ntfs, other filesystem type are mounted by system call.
 2. Create a directory in this partition called `.live` with an absolute path of `/Some/mount/point/.live/OSNAME`(OSNAME is like `debian` or `kali` and so on)
 3. If you need to use the first function:
@@ -152,7 +152,7 @@ This system supports the following functions:
 
 ### 5.4 Precautions
 
-1. This program starting-up functions only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTEFI) in linux label number order until a partition containing the `.live/OSNAME` directory is found (and meets the file system requirements mentioned above).
+1. This program starting-up functions only searches for the partition of the USB drive that contains this Livecd image. The search order is: first, search for the partition labeled Ventoy, then search for other partition of the USB drive(not labeled Ventoy or VOTYEFI) in linux label number order until a partition containing the `.live/OSNAME` directory is found (and meets the file system requirements mentioned above).
 2. When running this program on starting up, the permission is root, and all mounted partitions are read-only. I have only tested the relevant content on directories and files, and I am not sure if there will be any adverse side effects on files such as links. All files under `.live/OSNAME` must be regular file or direction, can not be links.
 3. When using the first starting-up function, it is not possible to overwrite a directory with a file in a certain location, or to overwrite a file with a directory.
 4. The performed order is: `preScript` -> `Function1` -> `Function2` -> `postScript`, and only run when the required file can be detected.
