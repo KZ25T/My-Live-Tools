@@ -170,18 +170,18 @@ This system supports the following functions:
 
 If you really like my system, you can try installing it. You need to have some Linux knowledge to install it, otherwise it is recommended to still follow the [official website](https://www.debian.org/distrib/)And refer to the author's notes on [precautions](https://blog.csdn.net/m0_57309959/article/details/135856767)Installation.
 
-**Reminder:** This function is not yet complete and has just been tested by myself simply. If damage is caused by improper operation, please bear the responsibility yourself.
+**Reminder:** This function is not yet complete and has just been tested by myself simply(It should be no problem). If damage is caused by improper operation, please bear the responsibility yourself.
 
 For example, installing debian. Steps:
 
 - Start this operating system.
-- Start GParted(command: sudo gparted) to partition the hard disk, allocate hard disk space for installing this system, and mount it on `/mnt/debian`. (Of course, the mounting point is arbitrary)
-- Tip: If your hard drive already has Windows (Windows 10 or 11) or Linux installed, there should be an ESP partition on the hard drive (opened with gparted, labeled as boot, esp, etc., formatted as fat32); If not, then you need to manually create a few hundred MB partition with the format fat32 as the ESP partition; Then mount your ESP partition to `/mnt/debian/boot/efi`.
+- Start GParted(command: `sudo gparted`) to partition the hard disk, allocate hard disk space for installing this system(at least an ext4 filesystem for root partitation), and mount it on `/mnt/debian`. (Of course, the mounting point is arbitrary)
+- Tip: If your hard drive already has Windows (Windows 10 or 11) or Linux installed, there should be an ESP partition on the hard drive (opened with gparted, labeled as boot, esp, etc., formatted as fat32); If not(such a new or empty hard disk), then you need to manually create a few hundred MB partition with the format fat32 as the ESP partition; Then mount your ESP partition to `/mnt/debian/boot/efi`.
   - Example: If your partition is adjusted to:
     ![1](1.png)
     Then:
     - Mount root directory: `sudo mkdir -p /mnt/debian && sudo mount /dev/sda2 /mnt/debian`
-    - Mount ESP partition: `sudo mkdir -p /mnt/debian && sudo mount /dev/sda2 /mnt/debian`
+    - Mount ESP partition: `sudo mkdir -p /mnt/debian/boot/efi && sudo mount /dev/sda2 /mnt/debian/boot/efi`
 - Copy content outside the entire system startup section: `sudo cp -rpv /run/live/rootfs/filesystem.squashfs/* /mnt/debian`
 - Installing the kernel
   - copy kernel and initramfs file: `sudo cp -pv /run/live/medium/live/vmlinuz /run/live/medium/live/initrd.img /mnt/debian/boot`
@@ -191,7 +191,7 @@ For example, installing debian. Steps:
     - Complete chroot: `sudo mlt -m /mnt/debian`, then `sudo chroot /mnt/debian /bin/bash`
     - Install grub: `(chroot) grub-install --boot-directory=/boot --efi-directory=/boot/efi YOUR_HARD_DRIV_PATH(e.g. /dev/sda)`
     - Configure system probe: `(chroot) vim /etc/default/grub`, Set the line of `GRUB_DISABLE_OS_PROBER` to false (usually in the commented state, please cancel the previous comment)
-    - Configure grub file: `(chroot) update-grub`, then ` (chroot) vim /boot/grub/grub.cfg `, add above the line of `END /etc/grub.d/30_os-prober`:
+    - Configure grub file: `(chroot) update-grub`, then ` (chroot) vim /boot/grub/grub.cfg `, and add the following content after the line of `BEGIN /etc/grub.d/30_os-prober`:
 
       ```text
       menuentry 'Debian' {
@@ -207,14 +207,22 @@ For example, installing debian. Steps:
 - Exit the chroot: ctrl+D or exit command, then `sudo mlt -u /mnt/debian`
 - Set up mounting system:
   - List the UUIDs of each partition through blkid, mainly focus on root directory partitions and ESP partitions.
-  - Set to `/etc/fstab`, for example:
+  - Set to `/etc/fstab` in the new os, for example:
+
+    ```text
+    sudo touch /mnt/debian/etc/fstab
+    sudoedit /mnt/debian/etc/fstab
+    ```
+
+    add the following content:
 
     ```text
     UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxx /          ext4    errors=remount-ro 0 1
     UUID=xxxx-yyyy                    /boot/efi  vfat    umask=0077        0 1
     ```
 
-  - After restarting, install necessary software, reset passwords, cancel automatic login, update apt source and software, etc.
+- Unmount os: `sudo umount /mnt/debian/boot/efi && sudo umount /mnt/debian`
+- After restarting, install necessary software, reset passwords, cancel automatic login, update apt source and software, etc.
 
 ## 7. Contact the author
 
