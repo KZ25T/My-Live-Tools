@@ -189,7 +189,7 @@ For example, installing debian. Steps:
     - Complete chroot: `sudo mlt -m /mnt/debian`, then `sudo chroot /mnt/debian /bin/bash`
     - Configure system probe: `(chroot) sudo vim /etc/default/grub`, Set the line of `GRUB_DISABLE_OS_PROBER` to false (usually in the commented state, please cancel the previous comment)
     - Install grub: `(chroot) sudo grub-install --boot-directory=/boot --efi-directory=/boot/efi YOUR_HARD_DRIV_PATH(e.g. /dev/sda)`
-    - Configure grub file: `(chroot) sudo update-grub`, then ` vim /boot/grub/grub.cfg `, add above the line of `END /etc/grub.d/30_os-prober`:
+    - Configure grub file: `(chroot) sudo update-grub`, then ` (chroot) vim /boot/grub/grub.cfg `, add above the line of `END /etc/grub.d/30_os-prober`:
 
       ```text
       menuentry 'Debian' {

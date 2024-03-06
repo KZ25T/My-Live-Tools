@@ -192,7 +192,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
     - 完成 chroot：`sudo mlt -m /mnt/debian`，之后 `sudo chroot /mnt/debian /bin/bash`
     - 配置系统探测：`(chroot) sudo vim /etc/default/grub` 将 `GRUB_DISABLE_OS_PROBER` 的那一行设置为 false（一般情况下应该是被注释状态，这时候请取消前面的注释）
     - 安装 grub：`(chroot) sudo grub-install --boot-directory=/boot --efi-directory=/boot/efi 你的硬盘（如 /dev/sda）`
-    - 配置 grub 文件：`(chroot) sudo update-grub`，之后 `vim /boot/grub/grub.cfg`，在 `END /etc/grub.d/30_os-prober` 上一行加上：
+    - 配置 grub 文件：`(chroot) sudo update-grub`，之后 `(chroot) vim /boot/grub/grub.cfg`，在 `END /etc/grub.d/30_os-prober` 上一行加上：
 
       ```text
       menuentry 'Debian' {
