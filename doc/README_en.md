@@ -116,6 +116,7 @@ This system supports the following functions:
      - Provide git configuration so that after booting up, the git will follow your configuration: `/home/user/.gitconfig` and `.git-credentials`
      - Provide SSH/GPG key configuration: `/home/user/.ssh/` or `/home/user/.gnupg/` to enable direct SSH after startup. **Safety reminder: If installing this configuration, please be careful to prevent related file leaks.**
      - Provide WiFi configuration: `/etc/NetworkManager/system connections/WIFI_NAME.nmconnection` can automatically connect to WiFi after startup.
+   - Tip: If you want to replace an existing directory on this livecd with your own (for example, replacing the existing `/home/user/.vim` with your own), please first write a command in `preScript` (see below) to delete the original directory.
 4. If you need to use the second function:
    - Create directory: `mkdir /home/mount/point/.live/OSNAME/packages`
    - Add the deb package that needs to be installed to the above directory.
@@ -167,26 +168,43 @@ This system supports the following functions:
 
 If you really like my system, you can try installing it. You need to have some Linux knowledge to install it, otherwise it is recommended to still follow the [official website](https://www.debian.org/distrib/)And refer to the author's notes on [precautions](https://blog.csdn.net/m0_57309959/article/details/135856767)Installation.
 
-**Reminder:** This function is not yet complete and has not been tested. If damage is caused by improper operation, please bear the responsibility yourself.
+**Reminder:** This function is not yet complete and has just been tested by myself simply. If damage is caused by improper operation, please bear the responsibility yourself.
 
-Steps:
+For example, installing debian. Steps:
 
 - Start this operating system.
-- Start GParted to partition the hard disk, allocate hard disk space for installing this system, and mount it on `/mnt/debian`. (Of course, the mounting point is arbitrary)
-- Tip: If your computer only has Windows (Windows 10 or 11) installed, there should be an ESP partition on your hard drive (opened with gparted, labeled as boot, esp, etc., formatted as fat32) that needs to be mounted to `/mnt/debian/boot/efi`.
--Copy content outside the entire system startup section: `sudo cp -rp /run/live/rootfs/filesystem.squashfs/* /mnt/debian`
+- Start GParted(command: sudo gparted) to partition the hard disk, allocate hard disk space for installing this system, and mount it on `/mnt/debian`. (Of course, the mounting point is arbitrary)
+- Tip: If your hard drive already has Windows (Windows 10 or 11) or Linux installed, there should be an ESP partition on the hard drive (opened with gparted, labeled as boot, esp, etc., formatted as fat32); If not, then you need to manually create a few hundred MB partition with the format fat32 as the ESP partition; Then mount your ESP partition to `/mnt/debian/boot/efi`.
+  - Example: If your partition is adjusted to:
+    ![1](1.png)
+    Then:
+    - Mount root directory: `sudo mkdir -p /mnt/debian && sudo mount /dev/sda2 /mnt/debian`
+    - Mount ESP partition: `sudo mkdir -p /mnt/debian && sudo mount /dev/sda2 /mnt/debian`
+- Copy content outside the entire system startup section: `sudo cp -rpv /run/live/rootfs/filesystem.squashfs/* /mnt/debian`
 - Installing the kernel
-  - copy kernel and initramfs file:`sudo cp /run/live/medium/boot/binary/live/vmlinuz /run/live/medium/boot/binary/live/initrd.img /mnt/debian/boot`
+  - copy kernel and initramfs file: `sudo cp -pv /run/live/medium/live/vmlinuz /run/live/medium/live/initrd.img /mnt/debian/boot`
 - Install grub and configure boot
-  - If your computer already has a grub (which is common when your computer already has a Linux operating system and will enter the grub page upon startup), then you don't need to install grub, just press back to the original Linux system, execute `sudo update grub` (some distributions are `grub-mkconfig -o /boot/grub/grub.cfg`), and remember to enable os-prober
-  - If your computer does not have Grub (which is common on your computer and may only have one Windows 10/11), you need to install Grub:
-    - Chroot: `sudo mlt /mnt/chroot`, then `sudo chroot /mnt/debian /bin/bash`
-    - Install EFI directory: `(chroot) sudo mkdir -p /boot/efi/EFI/debian`
-    - Install system probe: `(chroot) sudo apt install os-prober`, then mask option: `(chroot) sudo vim /etc/default/grub` Set `GRUB_DISABLE_OS_PROBER` to false or comment it out (otherwise other operating systems cannot be detected)
-    - Install grub file: `(chroot) sudo cp /usr/lib/grub/x86_64-efi/monolithic/grubx64.efi /boot/efi/EFI/debian`
-    - Update grub: `(chroot) sudo grub-install YOUR_HARD_DRIVE`, then `sudo update grub`
+  - If your hard drive already has a grub (which is common when your computer already has a Linux operating system and will enter the grub page upon startup), then you don't need to install grub, just press back to the original Linux system and execute `sudo update grub` (some distributions use `grub-mkconfig -o /boot/grub/grub.cfg`) (remember to enable os probe)
+  - If your hard drive does not have Grub (which is common on your computer and may only have one Windows 10/11), you need to install Grub:
+    - Complete chroot: `sudo mlt -m /mnt/debian`, then `sudo chroot /mnt/debian /bin/bash`
+    - Configure system probe: `(chroot) sudo vim /etc/default/grub`, Set the line of `GRUB_DISABLE_OS_PROBER` to false (usually in the commented state, please cancel the previous comment)
+    - Install grub: `(chroot) sudo grub-install --boot-directory=/boot --efi-directory=/boot/efi YOUR_HARD_DRIV_PATH(e.g. /dev/sda)`
+    - Configure grub file: `(chroot) sudo update-grub`, then ` vim /boot/grub/grub.cfg `, add above the line of `END /etc/grub.d/30_os-prober`:
+
+      ```text
+      menuentry 'Debian' {
+          insmod part_gpt
+          insmod ext2
+          search --no-floppy --fs-uuid --set=root root_directory_hard_disk_partition_UUID
+          linux /boot/vmlinuz root=UUID=root_directory_hard_disk_partition_UUID
+          initrd /boot/initrd.img
+      }
+      ```
+
+    The `root_directory_hard_disk_partition_UUID` is obtained by using the `blkid` command to find the corresponding UUID entry for the root directory partition.
+- Exit the chroot: ctrl+D or exit command, then `sudo mlt -u /mnt/debian`
 - Set up mounting system:
-  - List the UUIDs of each partition through blkid
+  - List the UUIDs of each partition through blkid, mainly focus on root directory partitions and ESP partitions.
   - Set to `/etc/fstab`, for example:
 
     ```text
@@ -194,7 +212,7 @@ Steps:
     UUID=xxxx-yyyy                    /boot/efi  vfat    umask=0077        0 1
     ```
 
-  - After restarting, install necessary software, reset passwords, cancel automatic login, etc.
+  - After restarting, install necessary software, reset passwords, cancel automatic login, update apt source and software, etc.
 
 ## 7. Contact the author
 
