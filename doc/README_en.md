@@ -134,6 +134,7 @@ This system supports the following functions:
    ```bash
    mount -t proc  /proc ${PATH}/proc/
    mount -t sysfs /sys  ${PATH}/sys/
+   mount --bind /sys/firmware/efi/efivars ${PATH}/sys/firmware/efi/efivars
    mount --rbind  /dev  ${PATH}/dev/
    mount --rbind  /run  ${PATH}/run/
    mount -t tmpfs  shm  ${PATH}/dev/shm/
@@ -147,6 +148,7 @@ This system supports the following functions:
    umount -R ${PATH}/run/
    mount --make-rslave ${PATH}/dev/
    umount -R ${PATH}/dev/
+   umount ${PATH}/sys/firmware/efi/efivars
    umount ${PATH}/sys/
    umount ${PATH}/proc
    ```
