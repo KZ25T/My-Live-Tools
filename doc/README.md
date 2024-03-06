@@ -190,9 +190,9 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
   - 如果您的硬盘已经有 grub 了（这种常见于你的电脑已经有一个 linux 操作系统，启动时会进入 grub 页面），那么您不需要安装 grub，只需要按回到原有的 linux 系统，执行 `sudo update-grub`（有些发行版为 `grub-mkconfig -o /boot/grub/grub.cfg`）即可（记得启用 os-prober）
   - 如果您的硬盘没有 grub （这种常见于你的电脑可能只有一个 windows 10/11），此时需要安装 grub：
     - 完成 chroot：`sudo mlt -m /mnt/debian`，之后 `sudo chroot /mnt/debian /bin/bash`
-    - 配置系统探测：`(chroot) sudo vim /etc/default/grub` 将 `GRUB_DISABLE_OS_PROBER` 的那一行设置为 false（一般情况下应该是被注释状态，这时候请取消前面的注释）
-    - 安装 grub：`(chroot) sudo grub-install --boot-directory=/boot --efi-directory=/boot/efi 你的硬盘（如 /dev/sda）`
-    - 配置 grub 文件：`(chroot) sudo update-grub`，之后 `(chroot) vim /boot/grub/grub.cfg`，在 `END /etc/grub.d/30_os-prober` 上一行加上：
+    - 安装 grub：`(chroot) grub-install --boot-directory=/boot --efi-directory=/boot/efi 你的硬盘（如 /dev/sda）`
+    - 配置系统探测：`(chroot) vim /etc/default/grub` 将 `GRUB_DISABLE_OS_PROBER` 的那一行设置为 false（一般情况下应该是被注释状态，这时候请取消前面的注释）
+    - 配置 grub 文件：`(chroot) update-grub`，之后 `(chroot) vim /boot/grub/grub.cfg`，在 `END /etc/grub.d/30_os-prober` 上一行加上：
 
       ```text
       menuentry 'Debian' {

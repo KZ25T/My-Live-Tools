@@ -187,9 +187,9 @@ For example, installing debian. Steps:
   - If your hard drive already has a grub (which is common when your computer already has a Linux operating system and will enter the grub page upon startup), then you don't need to install grub, just press back to the original Linux system and execute `sudo update grub` (some distributions use `grub-mkconfig -o /boot/grub/grub.cfg`) (remember to enable os probe)
   - If your hard drive does not have Grub (which is common on your computer and may only have one Windows 10/11), you need to install Grub:
     - Complete chroot: `sudo mlt -m /mnt/debian`, then `sudo chroot /mnt/debian /bin/bash`
-    - Configure system probe: `(chroot) sudo vim /etc/default/grub`, Set the line of `GRUB_DISABLE_OS_PROBER` to false (usually in the commented state, please cancel the previous comment)
-    - Install grub: `(chroot) sudo grub-install --boot-directory=/boot --efi-directory=/boot/efi YOUR_HARD_DRIV_PATH(e.g. /dev/sda)`
-    - Configure grub file: `(chroot) sudo update-grub`, then ` (chroot) vim /boot/grub/grub.cfg `, add above the line of `END /etc/grub.d/30_os-prober`:
+    - Install grub: `(chroot) grub-install --boot-directory=/boot --efi-directory=/boot/efi YOUR_HARD_DRIV_PATH(e.g. /dev/sda)`
+    - Configure system probe: `(chroot) vim /etc/default/grub`, Set the line of `GRUB_DISABLE_OS_PROBER` to false (usually in the commented state, please cancel the previous comment)
+    - Configure grub file: `(chroot) update-grub`, then ` (chroot) vim /boot/grub/grub.cfg `, add above the line of `END /etc/grub.d/30_os-prober`:
 
       ```text
       menuentry 'Debian' {
