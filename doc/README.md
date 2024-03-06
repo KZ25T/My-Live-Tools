@@ -137,7 +137,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
    ```bash
    mount -t proc  /proc ${PATH}/proc/
    mount -t sysfs /sys  ${PATH}/sys/
-   mount --bind /sys/firmware/efi/efivars ${PATH}/sys/firmware/efi/efivars
+   mount --bind /sys/firmware/efi/efivars ${PATH}/sys/firmware/efi/efivars/
    mount --rbind  /dev  ${PATH}/dev/
    mount --rbind  /run  ${PATH}/run/
    mount -t tmpfs  shm  ${PATH}/dev/shm/
@@ -152,7 +152,7 @@ Debian 是一个很干净的系统，为了使得其变得好用，我引入了�
    mount --make-rslave ${PATH}/dev/
    umount -R ${PATH}/dev/
    umount ${PATH}/sys/firmware/efi/efivars
-   umount ${PATH}/sys/
+   umount ${PATH}/sys
    umount ${PATH}/proc
    ```
 

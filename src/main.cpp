@@ -136,7 +136,7 @@ int main(int argc, const char* argv[]) {
 			printf("see https://wiki.archlinux.org/title/Chroot#Using_chroot \n");
 			runCMD(format("mount -t proc  /proc {}/proc/", argv2));
 			runCMD(format("mount -t sysfs /sys  {}/sys/", argv2));
-			runCMD(format("mount --bind /sys/firmware/efi/efivars {}/sys/firmware/efi/efivars", argv2));
+			runCMD(format("mount --bind /sys/firmware/efi/efivars {}/sys/firmware/efi/efivars/", argv2));
 			runCMD(format("mount --rbind  /dev  {}/dev/", argv2));
 			runCMD(format("mount --rbind  /run  {}/run/", argv2));
 			runCMD(format("mount -t tmpfs  shm  {}/dev/shm/", argv2));
@@ -150,7 +150,7 @@ int main(int argc, const char* argv[]) {
 			runCMD(format("mount --make-rslave {}/dev/", argv2));
 			runCMD(format("umount -R {}/dev/", argv2));
 			runCMD(format("umount {}/sys/firmware/efi/efivars", argv2));
-			runCMD(format("umount {}/sys/", argv2));
+			runCMD(format("umount {}/sys", argv2));
 			runCMD(format("umount {}/proc", argv2));
 			return 0;
 		}
