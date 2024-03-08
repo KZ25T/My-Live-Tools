@@ -127,7 +127,7 @@ bool LoadConfig::GetDevices::GetMountedList() {
 	string		  mountedBlock;
 	if (mounts.bad()) return false;
 	while (true) {
-		char buf[160];
+		char buf[256];
 		mounts.getline(buf, sizeof(buf));
 		if (mounts.eof()) break;
 		// usb should as /dev/sdxN
