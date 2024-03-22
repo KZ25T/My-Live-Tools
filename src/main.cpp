@@ -44,15 +44,15 @@ void displayHelp(const char* cmd0) {
 		"display help info\n",
 		cmd0);
 	printf(
-		"%s --config-path(or -c) PATH:    "	 // cmds
+		"sudo %s --config-path(or -c) PATH:    "  // cmds
 		"specify files path(.live/%s)\n",
 		cmd0, PLATFORM);
 	printf(
-		"%s --mount-dev(or -m) ROOTPATH:  "	 // cmds
+		"sudo %s --mount-dev(or -m) ROOTPATH:  "  // cmds
 		"mount  /proc, /sys, /dev, /run, /dev/shm on ROOTPATH\n",
 		cmd0);
 	printf(
-		"%s --umount-dev(or -u) ROOTPATH: "	 // cmds
+		"sudo %s --umount-dev(or -u) ROOTPATH: "  // cmds
 		"umount /proc, /sys, /dev, /run, /dev/shm on ROOTPATH\n",
 		cmd0);
 
@@ -60,6 +60,18 @@ void displayHelp(const char* cmd0) {
 }
 
 int main(int argc, const char* argv[]) {
+	// display help
+	if (argc == 2 && (streql(argv[1], "--help") || streql(argv[1], "-h"))) {
+		displayHelp(argv[0]);
+		return 0;
+	}
+	// judge if root is provided
+	if(getuid() != uid_t(0)) {
+		printf("You must run this command as root(or sudo).\n");
+		displayHelp(argv[0]);
+		return 1;
+	}
+	// run prog
 	if (argc == 1) {
 		printf("%s error: args missing.\n", argv[0]);
 		displayHelp(argv[0]);
@@ -116,10 +128,6 @@ int main(int argc, const char* argv[]) {
 			rmdir(mntPoint);
 			return 0;
 		}
-		if (streql(argv[1], "--help") || streql(argv[1], "-h")) {
-			displayHelp(argv[0]);
-			return 0;
-		}
 		// not supported command
 		printf("%s error: not supported options: %s.\n", argv[0], argv[1]);
 		displayHelp(argv[0]);
@@ -136,7 +144,9 @@ int main(int argc, const char* argv[]) {
 			printf("see https://wiki.archlinux.org/title/Chroot#Using_chroot \n");
 			runCMD(format("mount -t proc  /proc {}/proc/", argv2));
 			runCMD(format("mount -t sysfs /sys  {}/sys/", argv2));
-			runCMD(format("mount --bind /sys/firmware/efi/efivars {}/sys/firmware/efi/efivars/", argv2));
+			runCMD(format(
+				"mount --bind /sys/firmware/efi/efivars {}/sys/firmware/efi/efivars/",
+				argv2));
 			runCMD(format("mount --rbind  /dev  {}/dev/", argv2));
 			runCMD(format("mount --rbind  /run  {}/run/", argv2));
 			runCMD(format("mount -t tmpfs  shm  {}/dev/shm/", argv2));
