@@ -1,10 +1,8 @@
 # 使用说明
 
-这个 livecd 是一个 Linux 爱好者自行制作的开源版，主要面向中国用户，可以进行磁盘管理、网络连接、软件开发等工作。
+这个 livecd 是一个 Linux 爱好者自行制作的开源版，主要面向中国（含港澳台地区）用户，可以进行磁盘管理、网络连接、软件开发等工作。
 
-**重要更新** 本系统支持在原有镜像基础上进行小规模定制，参考[Livecd工具](#5livecd工具)
-
-**重要更新** kali 版 livecd 仿照 kali 的官方 livecd 安装了几乎全面的网卡驱动，比 Debian 的驱动更为全面。
+2024.2 版本更新：添加 VMware 支持，预装微信。
 
 [TOC]
 
@@ -22,8 +20,8 @@
 系统基本信息：
 
 - 架构：amd64, x86_64
-- 发行版：kali 2024.1
-- 内核版本：6.6.9
+- 发行版：kali 2024.2
+- 内核版本：6.8.11
 - 图形桌面：xfce4
 - 登录管理器：lightdm（已配置为自动登录）
 
@@ -31,27 +29,28 @@
 
 为了方便实用，我这里预装了部分常用软件，包括：
 
-- 浏览器：firefox 浏览器（系统自带，区别于 debian）
+- 浏览器：firefox 浏览器（系统自带）
 - 输入法：搜狗拼音输入法
   - 基于 fcitx 的输入法，在托盘内，按 `shift` 切换中英文。
-  - 这个版本搜狗自带的 Qt 库有问题，作者使用系统 Qt 库修复之。
+  - 非最新版，参考：[链接](https://blog.csdn.net/m0_57309959/article/details/139149823)
 - 通讯软件：QQ
   - 启动方式：任务栏，或命令：`/opt/QQ/qq`
-  - 微信暂未给出可靠的 Linux 版本，所以没有安装，如有需要可以下载[优麒麟微信](https://www.ubuntukylin.com/applications/106-cn.html)安装使用。
+- 通讯软件：微信
+  - 启动方式：任务栏，或命令：`wechat`
+  - 非官方版，为自制精简版，参考：[链接](https://blog.csdn.net/m0_57309959/article/details/138078697)
 - 上网工具：NetworkManager（系统自带）
   - 托盘网络图标点击上网，或用命令 `nm-applet` 启动。
 - 开发工具：VSCode
   - 启动方式：任务栏，或命令：`code` 或 `code somepath`
 - 开发工具：vim
-  - 按照作者本人喜欢的 vim 配置进行了预设。
+  - 做了部分简单配置。
 - 磁盘管理：gparted
   - 已安装常见的若干文件系统工具。
-- 硬件管理：hardinfo
+- 硬件管理：hardinfo2
 - 编译链工具：build-essential，可以使用 gcc 等命令。
 
 其他常用命令：
 
-- `zh` 或 `en` 调整终端语言。对于上面的 hardinfo，gparted 等应用，默认从终端打开为英文，可以输入 zh 调整为中文后打开，也可以在前边设置环境变量，如：`LANG=zh_CN.UTF-8 hardinfo`
 - 设置桌面等显示：`xfce4-settings-manager`
 - 命令行上网（上网备选方案）：`nmtui`
 - 查看命令用法：`tldr`，如：`tldr tar`
@@ -67,12 +66,13 @@
 为了使 kali 变得好用，我引入了一些闭源软件或其他内容。以下是部分改动（不包括上一条预装软件）：
 
 - 修改 apt 源为[中科大源](https://mirrors.ustc.edu.cn/help/)（感谢中国科学技术大学开源软件镜像支持）。虽然中科大源已进入 kali 官方源列表，但为了使得源更稳定，此处仍然修改源。
-- 安装一些常用开源软件。
+- 安装一些常用开源软件，参见本仓库的 `doc/install.sh`；删除部分系统缓存等内容，参见本仓库的 `doc/remove.sh`
 - 参照 kali live 的驱动列表，安装了几乎全部常见网卡驱动。
 - 修改系统主题为类似 Windows 10 的主题。同时为节省空间，删除 `/usr/share` 的多余的个性化配置。
 - 修改用户终端为 zsh 并按照作者本人喜爱的方式进行配置。
-- 修改常用编辑器、文字浏览器为 vim 并进行配置。
-- 预装中文环境，但系统仍为英文。
+- 修改常用编辑器、文字浏览器为 vim 并进行简单配置。
+- 添加 VMWare 支持。
+- 预装中文环境，但系统仍为英文。为方便我国港澳台地区使用，本系统添加了繁体中文（zh_HK）支持。
 - 添加字体 consolas 和 msyh，分别作为等宽字体和常用字体。
 
 本系统为爱好者制作的免费工具，不做任何商业用途。本人未主观引入恶意程序或计算机病毒，如果是安装的某些软件自带病毒，那么请找到对应的软件提供者解决。使用此操作系统时，请遵守所在国家或地区的法律规定，使用本系统造成的一切后果，作者不承担责任。
@@ -186,7 +186,7 @@
     ![1](1.png)
     然后：
     - 挂载根目录： `sudo mkdir -p /mnt/kali && sudo mount /dev/sda2 /mnt/kali`
-    - 挂载 ESP 分区： `sudo mkdir -p /mnt/kali/boot/efi && sudo mount /dev/sda2 /mnt/kali/boot/efi`
+    - 挂载 ESP 分区： `sudo mkdir -p /mnt/kali/boot/efi && sudo mount /dev/sda1 /mnt/kali/boot/efi`
 - 复制整个系统启动部分以外的内容：`sudo cp -rpv /run/live/rootfs/filesystem.squashfs/* /mnt/kali`，可能需要 1-5 分钟。
 - 安装内核
   - 复制内核及 initramfs 文件：`sudo cp -pv /run/live/medium/live/vmlinuz /run/live/medium/live/initrd.img /mnt/kali/boot`
@@ -237,3 +237,5 @@
 本系统的部分制作方法，作者已公开于 CSDN 网站：[部分内容](https://blog.csdn.net/m0_57309959)
 
 如您有作者的 QQ 或微信等联系方式，也可以直接联系。
+
+af am ar as ast az be bg bn bn_IN br bs ca ca@valencia cmn crh cs cy da de dz el en_AU en_CA en_GB eo es es_AR es_CL es_CO es_MX et eu fa fi fr frp fur fy ga gl gu ha he hi hr hu hy ia id ie ig is it ja ka kab kk km kn ko ks ku ku_IQ ky li lt lv mai mg mk ml mn mr ms my nb nds ne nl nn nso oc or pa pl pms ps pt pt_BR ro ru rw si sk sl sq sr sr@latin sv ta te th tk tr ug uk ur uz vi wa xh yo zh_TW zu

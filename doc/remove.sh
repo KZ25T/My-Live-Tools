@@ -1,7 +1,6 @@
-sudo rm -r
-sysroot/etc/apt/sources.list.d/
+sudo rm -rf
 sysroot/etc/fstab
-sysroot/etc/NetworkManager/system-connections/*
+sysroot/etc/NetworkManager/system-connections/
 sysroot/etc/resolv.conf
 sysroot/home/user/.bash_history
 sysroot/home/user/.bash_logout
@@ -9,6 +8,8 @@ sysroot/home/user/.cache/
 sysroot/home/user/.config/enchant/
 sysroot/home/user/.config/fcitx/log/
 sysroot/home/user/.config/sogoupinyin/
+sysroot/home/user/.face
+sysroot/home/user/.face.icon
 sysroot/home/user/.gnupg/
 sysroot/home/user/.ICEauthority
 sysroot/home/user/.lesshst
@@ -17,6 +18,7 @@ sysroot/home/user/.local/share/flatpak/db
 sysroot/home/user/.local/share/icc/
 sysroot/home/user/.local/share/keyrings/
 sysroot/home/user/.local/share/xorg/
+sysroot/home/user/.oh-my-zsh/cache/*
 sysroot/home/user/.presage/
 sysroot/home/user/.sogouinput/
 sysroot/home/user/.sudo_as_admin_successful
@@ -37,15 +39,19 @@ sysroot/root/.ssh
 sysroot/root/.viminfo
 sysroot/root/.wget-hsts
 sysroot/root/.Xauthority
+sysroot/tmp
+sysroot/usr/share/help/{af,am,ar,as,ast,az,be,bg,bn,bn_IN,br,bs,ca,ca@valencia,cmn,crh,cs,cy,da,de,dz,el,en_AU,en_CA,en_GB,eo,es,es_AR,es_CL,es_CO,es_MX,et,eu,fa,fi,fr,frp,fur,fy,ga,gl,gu,ha,he,hi,hr,hu,hy,ia,id,ie,ig,is,it,ja,ka,kab,kk,km,kn,ko,ks,ku,ku_IQ,ky,li,lt,lv,mai,mg,mk,ml,mn,mr,ms,my,nb,nds,ne,nl,nn,nso,oc,or,pa,pl,pms,ps,pt,pt_BR,ro,ru,rw,si,sk,sl,sq,sr,sr@latin,sv,ta,te,th,tk,tr,ug,uk,ur,uz,vi,wa,xh,yo,zh_TW,zu}
+sysroot/var/backups/
+sysroot/var/cache/apt/*.bin
 sysroot/var/cache/debconf/config.dat-old
 sysroot/var/cache/debconf/templates.dat-old
+sysroot/var/lib/apt/lists/mirrors*
 sysroot/var/log/boot.log
 sysroot/var/log/btmp
 sysroot/var/log/faillog
-sysroot/var/log/journal/
+sysroot/var/log/journal
 sysroot/var/log/lastlog
-sysroot/var/log/mlt.*
-sysroot/var/log/openvpn
+sysroot/var/log/mlt.0.log
+sysroot/var/log/openvpn/
 sysroot/var/log/wtmp
 sysroot/var/log/Xorg.0.log*
-sysroot/var/log/Xorg.0.log.old
